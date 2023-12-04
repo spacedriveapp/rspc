@@ -28,7 +28,7 @@ httpz = ["dep:httpz", "httpz/cookies"]
 # openapi = ["dep:openapiv3"]
 anyhow = ["dep:anyhow"]
 
-alpha = [] # APIs that are not yet stable
+alpha = []    # APIs that are not yet stable
 unstable = [] # APIs where one line of code can blow up your whole app
 
 # Webservers
@@ -58,8 +58,8 @@ bytesize = ["specta/bytesize"]
 glam = ["specta/glam"]
 
 [dependencies]
-specta = { version = "1.0.4", features = ["serde", "typescript", "tokio"] }
-httpz = { version = "0.0.4", optional = true } # TODO: Move back to crates.io release
+specta = { version = "=2.0.0-rc.6", features = ["serde", "typescript", "tokio"] }
+httpz = { version = "0.0.4", optional = true }                                    # TODO: Move back to crates.io release
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = "1.0.95"
 thiserror = "1.0.40"
@@ -72,7 +72,7 @@ anyhow = { version = "1", optional = true }
 futures-locks = { version = "0.7.1", features = ["tokio"] }
 futures-channel = "0.3.28"
 nougat = "0.2.4"
-pin-project = "1.0.12" # TODO: Move to `pin-project-lite`
+pin-project = "1.0.12"                                                            # TODO: Move to `pin-project-lite`
 
 [dev-dependencies]
 # Tests
@@ -84,13 +84,8 @@ pprof = { version = "0.11.1", features = ["flamegraph", "criterion", "protobuf-c
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
 
 [workspace]
-members = [
-    "./create-rspc-app",
-    "./examples",
-    "./examples/axum",
-    "./examples/vercel",
-]
+members = ["./create-rspc-app", "./examples", "./examples/axum", "./examples/vercel"]
 
 [patch.crates-io]
 httpz = { git = "https://github.com/oscartbeaumont/httpz", rev = "2afc85de7c05b5d7d9b74c5439baf5a952162b15" } # TODO: Move back to crates.io release
-specta = { git = "https://github.com/oscartbeaumont/specta", rev = "2fc97ec8178ba27da1c80c0faaf43cb0db95955f" }
+# specta = { git = "https://github.com/oscartbeaumont/specta", rev = "2fc97ec8178ba27da1c80c0faaf43cb0db95955f" }
