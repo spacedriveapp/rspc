@@ -1,5 +1,5 @@
 <p align="center">
- <img width="150" height="150" src="/docs/public/logo.png" alt="Logo">
+ <img width="150" height="150" src="https://github.com/oscartbeaumont/rspc/blob/main/docs/public/logo.png" alt="Logo">
 </p>
 <h1 align="center">rspc</h1>
 
