@@ -16,10 +16,6 @@ categories = ["web-programming", "asynchronous"]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
-[[bench]]
-name = "benchmarks"
-harness = false
-
 [features]
 default = []
 tauri = ["dep:tauri"]
@@ -33,14 +29,6 @@ unstable = [] # APIs where one line of code can blow up your whole app
 
 # Webservers
 axum = ["httpz", "httpz/axum", "httpz/tokio-ws", "httpz/axum"]
-# actix-web = ["httpz/actix-web"]
-# poem = ["httpz/poem"]
-# rocket = ["httpz/rocket"]
-# warp = ["httpz/warp"]
-# TODO: Following ones are exposed but not officially supported
-lambda = ["httpz", "httpz/lambda", "httpz/ws", "httpz/axum"]
-workers = ["httpz", "httpz/workers", "httpz/ws"]
-vercel = ["httpz", "httpz/vercel", "httpz/ws", "axum"]
 
 # Specta # TODO: Remove all of these with v1
 uuid = ["specta/uuid"]
@@ -59,7 +47,7 @@ glam = ["specta/glam"]
 
 [dependencies]
 specta = { version = "=2.0.0-rc.6", features = ["serde", "typescript", "tokio"] }
-httpz = { version = "0.0.4", optional = true }                                    # TODO: Move back to crates.io release
+httpz = { path = "./httpz", optional = true }
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = "1.0.95"
 thiserror = "1.0.40"
@@ -84,8 +72,4 @@ pprof = { version = "0.11.1", features = ["flamegraph", "criterion", "protobuf-c
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
 
 [workspace]
-members = ["./create-rspc-app", "./examples", "./examples/axum", "./examples/vercel"]
-
-[patch.crates-io]
-httpz = { git = "https://github.com/oscartbeaumont/httpz", rev = "2afc85de7c05b5d7d9b74c5439baf5a952162b15" } # TODO: Move back to crates.io release
-# specta = { git = "https://github.com/oscartbeaumont/specta", rev = "2fc97ec8178ba27da1c80c0faaf43cb0db95955f" }
+members = ["./httpz", "./examples", "./examples/axum"]
