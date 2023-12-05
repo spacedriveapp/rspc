@@ -1,7 +1,7 @@
 use std::{borrow::Cow, marker::PhantomData};
 
 use serde::de::DeserializeOwned;
-use specta::{ts::TsExportError, DefOpts, Type, TypeDefs};
+use specta::{ts, Type, TypeMap};
 
 use crate::{alpha_stable::AlphaRequestLayer, internal::ProcedureDataType};
 
@@ -24,24 +24,12 @@ pub trait ResolverFunction<TMarker>: Send + Sync + 'static {
 
     fn typedef<TMiddleware: AlphaMiddlewareBuilderLikeCompat>(
         key: Cow<'static, str>,
-        defs: &mut TypeDefs,
-    ) -> Result<ProcedureDataType, TsExportError> {
+        type_map: &mut TypeMap,
+    ) -> Result<ProcedureDataType, ts::ExportError> {
         Ok(ProcedureDataType {
             key,
-            input: <TMiddleware::Arg<Self::Arg> as Type>::reference(
-                DefOpts {
-                    parent_inline: false,
-                    type_map: defs,
-                },
-                &[],
-            )?,
-            result: <Self::RawResult as Type>::reference(
-                DefOpts {
-                    parent_inline: false,
-                    type_map: defs,
-                },
-                &[],
-            )?,
+            input: <TMiddleware::Arg<Self::Arg> as Type>::reference(type_map, &[]).inner,
+            result: <Self::RawResult as Type>::reference(type_map, &[]).inner,
         })
     }
 }

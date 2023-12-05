@@ -1,6 +1,6 @@
 use std::{borrow::Cow, marker::PhantomData};
 
-use specta::TypeDefs;
+use specta::TypeMap;
 
 use crate::{
     internal::{BaseMiddleware, ProcedureStore},
@@ -18,6 +18,7 @@ where
     TCtx: Send + Sync + 'static,
 {
     procedures: ProcedureList<TCtx>,
+    dangerously_map_types: Option<Box<dyn FnOnce(&mut TypeMap) + Send + Sync + 'static>>,
 }
 
 impl<TCtx> AlphaRouter<TCtx>
@@ -29,6 +30,7 @@ where
     pub fn new() -> Self {
         Self {
             procedures: Vec::new(),
+            dangerously_map_types: None,
         }
     }
 
@@ -120,13 +122,21 @@ where
         self
     }
 
+    pub fn sd_patch_types_dangerously(
+        mut self,
+        func: impl FnOnce(&mut TypeMap) + Send + Sync + 'static,
+    ) -> Self {
+        self.dangerously_map_types = Some(Box::new(func));
+        self
+    }
+
     // #[deprecated = "Being removed on v1.0.0 once the new syntax is stable"]
     pub fn compat(self) -> Router<TCtx, ()> {
         // TODO: Eventually take these as an argument so we can access the plugin store from the parent router -> For this we do this for compat
         let mut queries = ProcedureStore::new("queries"); // TODO: Take in as arg
         let mut mutations = ProcedureStore::new("mutations"); // TODO: Take in as arg
         let mut subscriptions = ProcedureStore::new("subscriptions"); // TODO: Take in as arg
-        let mut typ_store = TypeDefs::new(); // TODO: Take in as arg
+        let mut typ_store = TypeMap::default(); // TODO: Take in as arg
 
         let mut ctx = IntoProcedureCtx {
             ty_store: &mut typ_store,
@@ -155,7 +165,7 @@ where
         let mut queries = ProcedureStore::new("queries"); // TODO: Take in as arg
         let mut mutations = ProcedureStore::new("mutations"); // TODO: Take in as arg
         let mut subscriptions = ProcedureStore::new("subscriptions"); // TODO: Take in as arg
-        let mut typ_store = TypeDefs::new(); // TODO: Take in as arg
+        let mut typ_store = TypeMap::default(); // TODO: Take in as arg
 
         let mut ctx = IntoProcedureCtx {
             ty_store: &mut typ_store,
@@ -167,6 +177,10 @@ where
         for (key, mut procedure) in self.procedures.into_iter() {
             // TODO: Pass in the `key` here with the router merging prefixes already applied so it's the final runtime key
             procedure.build(key, &mut ctx);
+        }
+
+        if let Some(dangerously_map_types) = self.dangerously_map_types {
+            (dangerously_map_types)(&mut typ_store);
         }
 
         let router = Router {
@@ -195,7 +209,7 @@ impl<TCtx: Send + Sync + 'static> AlphaRouterBuilderLike<TCtx> for AlphaRouter<T
 }
 
 pub struct IntoProcedureCtx<'a, TCtx> {
-    pub ty_store: &'a mut TypeDefs,
+    pub ty_store: &'a mut TypeMap,
     pub queries: &'a mut ProcedureStore<TCtx>,
     pub mutations: &'a mut ProcedureStore<TCtx>,
     pub subscriptions: &'a mut ProcedureStore<TCtx>,

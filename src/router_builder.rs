@@ -1,7 +1,7 @@
 use std::{borrow::Cow, marker::PhantomData, panic::Location, process};
 
 use serde::de::DeserializeOwned;
-use specta::{ts::TsExportError, DefOpts, Type, TypeDefs};
+use specta::{ts, Type, TypeMap};
 
 use crate::{
     internal::{
@@ -65,7 +65,7 @@ pub struct RouterBuilder<
     pub(crate) queries: ProcedureStore<TCtx>,
     pub(crate) mutations: ProcedureStore<TCtx>,
     pub(crate) subscriptions: ProcedureStore<TCtx>,
-    pub(crate) typ_store: TypeDefs,
+    pub(crate) typ_store: TypeMap,
     pub(crate) phantom: PhantomData<TMeta>,
 }
 
@@ -117,7 +117,7 @@ where
             queries: ProcedureStore::new("query"),
             mutations: ProcedureStore::new("mutation"),
             subscriptions: ProcedureStore::new("subscription"),
-            typ_store: TypeDefs::new(),
+            typ_store: TypeMap::default(),
             phantom: PhantomData,
         }
     }
@@ -151,7 +151,7 @@ where
 
     #[doc(hidden)]
     #[cfg(feature = "unstable")]
-    pub fn typ_store(&mut self) -> &mut TypeDefs {
+    pub fn typ_store(&mut self) -> &mut TypeMap {
         &mut self.typ_store
     }
 
@@ -395,8 +395,8 @@ where
             }
         }
 
-        for (name, typ) in router.typ_store {
-            self.typ_store.insert(name, typ);
+        for (name, typ) in router.typ_store.iter() {
+            self.typ_store.insert(name, typ.clone());
         }
 
         self
@@ -487,8 +487,8 @@ where
             }
         }
 
-        for (name, typ) in router.typ_store.into_iter() {
-            typ_store.insert(name, typ);
+        for (name, typ) in router.typ_store.iter() {
+            typ_store.insert(name, typ.clone());
         }
 
         RouterBuilder {
@@ -540,23 +540,11 @@ where
 #[doc(hidden)]
 pub fn typedef<TArg: Type, TResult: Type>(
     key: Cow<'static, str>,
-    defs: &mut TypeDefs,
-) -> Result<ProcedureDataType, TsExportError> {
+    type_map: &mut TypeMap,
+) -> Result<ProcedureDataType, ts::ExportError> {
     Ok(ProcedureDataType {
         key,
-        input: <TArg as Type>::reference(
-            DefOpts {
-                parent_inline: false,
-                type_map: defs,
-            },
-            &[],
-        )?,
-        result: <TResult as Type>::reference(
-            DefOpts {
-                parent_inline: false,
-                type_map: defs,
-            },
-            &[],
-        )?,
+        input: <TArg as Type>::reference(type_map, &[]).inner,
+        result: <TResult as Type>::reference(type_map, &[]).inner,
     })
 }

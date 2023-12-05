@@ -46,7 +46,7 @@ bytesize = ["specta/bytesize"]
 glam = ["specta/glam"]
 
 [dependencies]
-specta = { version = "=2.0.0-rc.6", features = ["serde", "typescript", "tokio"] }
+specta = { version = "=2.0.0-rc.7", features = ["serde", "serde_json", "typescript", "tokio"] }
 httpz = { path = "./httpz", optional = true }
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = "1.0.95"
@@ -60,7 +60,7 @@ anyhow = { version = "1", optional = true }
 futures-locks = { version = "0.7.1", features = ["tokio"] }
 futures-channel = "0.3.28"
 nougat = "0.2.4"
-pin-project = "1.0.12"                                                            # TODO: Move to `pin-project-lite`
+pin-project = "1.0.12"                                                                          # TODO: Move to `pin-project-lite`
 
 [dev-dependencies]
 # Tests

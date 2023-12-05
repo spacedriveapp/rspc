@@ -1,7 +1,7 @@
 use std::{error, fmt, sync::Arc};
 
 use serde::Serialize;
-use specta::{ts::TsExportError, Type};
+use specta::{ts, Type};
 
 use crate::internal::jsonrpc::JsonRPCError;
 
@@ -89,7 +89,7 @@ pub enum ExportError {
     #[error("IO error exporting bindings: {0}")]
     IOErr(#[from] std::io::Error),
     #[error("error exporting typescript bindings: {0}")]
-    TsExportErr(#[from] TsExportError),
+    TsExportErr(#[from] ts::ExportError),
 }
 
 #[derive(Debug, Clone, Serialize, Type)]

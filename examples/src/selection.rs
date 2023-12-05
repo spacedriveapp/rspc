@@ -23,7 +23,7 @@ pub fn mount() -> RouterBuilder {
                     password: "password".to_string(),
                 };
 
-                selection!(user, { id, name, age })
+                Ok::<(), rspc::Error>(selection!(user, { id, name, age }))
             })
         })
         .query("customSelectionOnList", |t| {
@@ -35,7 +35,7 @@ pub fn mount() -> RouterBuilder {
                     age: 7,
                     password: "password".to_string(),
                 }];
-                selection!(users, [{ id, name, age }])
+                Ok::<(), rspc::Error>(selection!(users, [{ id, name, age }]))
             })
         })
 }

@@ -37,23 +37,6 @@ pub trait AlphaRequestLayer<TMarker> {
 // For queries and mutations
 
 #[doc(hidden)]
-pub enum AlphaSerializeMarker {}
-impl<T> AlphaRequestLayer<AlphaSerializeMarker> for T
-where
-    T: Serialize + Type,
-{
-    type Result = T;
-    type Stream = Once<Ready<Result<Value, ExecError>>>;
-    type Type = FutureMarker;
-
-    fn exec(self) -> Self::Stream {
-        once(ready(
-            serde_json::to_value(self).map_err(ExecError::SerializingResultErr),
-        ))
-    }
-}
-
-#[doc(hidden)]
 pub enum AlphaResultMarker {}
 impl<T> AlphaRequestLayer<AlphaResultMarker> for Result<T, Error>
 where
@@ -67,22 +50,6 @@ where
         once(ready(self.map_err(ExecError::ErrResolverError).and_then(
             |v| serde_json::to_value(v).map_err(ExecError::SerializingResultErr),
         )))
-    }
-}
-
-#[doc(hidden)]
-pub enum AlphaFutureSerializeMarker {}
-impl<TFut, T> AlphaRequestLayer<AlphaFutureSerializeMarker> for TFut
-where
-    TFut: Future<Output = T> + Send + 'static,
-    T: Serialize + Type + Send + 'static,
-{
-    type Result = T;
-    type Stream = Once<FutureSerializeFuture<TFut, T>>;
-    type Type = FutureMarker;
-
-    fn exec(self) -> Self::Stream {
-        once(FutureSerializeFuture(self, PhantomData))
     }
 }
 
