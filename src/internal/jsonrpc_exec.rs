@@ -5,6 +5,7 @@ use std::{
     pin::Pin,
     sync::Arc,
     task::{Context, Poll},
+    time::Instant,
 };
 
 use futures::StreamExt;
@@ -79,7 +80,7 @@ where
     }
 
     fn send(self, resp: jsonrpc::Response) -> Self::SendFut {
-        OwnedMpscSenderSendFut(self.0, Some(resp))
+        OwnedMpscSenderSendFut(self.0, Some(resp), Instant::now())
     }
 }
 
@@ -101,13 +102,14 @@ impl OwnedSender for OwnedMpscSender {
     type SendFut<'a> = OwnedMpscSenderSendFut<'a>;
 
     fn send(&mut self, resp: jsonrpc::Response) -> Self::SendFut<'_> {
-        OwnedMpscSenderSendFut(&mut self.0, Some(resp))
+        OwnedMpscSenderSendFut(&mut self.0, Some(resp), Instant::now())
     }
 }
 
 pub struct OwnedMpscSenderSendFut<'a>(
     &'a mut futures_channel::mpsc::Sender<jsonrpc::Response>,
     Option<jsonrpc::Response>,
+    Instant,
 );
 
 impl<'a> Future for OwnedMpscSenderSendFut<'a> {
@@ -124,6 +126,7 @@ impl<'a> Future for OwnedMpscSenderSendFut<'a> {
                         tracing::error!("Failed to send response: {}", _err);
                     })
                     .ok();
+                println!("OwnedMpscSenderSendFut - {:?}", this.2.elapsed());
                 Poll::Ready(())
             }
             Poll::Ready(Err(_err)) => {
@@ -216,6 +219,8 @@ where
 
                         let y = match stream.next().await.unwrap() {
                             Ok(v) => {
+                                println!("\thandle_json_rpc - yielded - {:?}", time.elapsed());
+
                                 sender
                                     .send(jsonrpc::Response {
                                         jsonrpc: "2.0",

@@ -5,6 +5,7 @@ use std::{
     hash::{Hash, Hasher},
     marker::PhantomData,
     sync::{Arc, Mutex},
+    time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
 use futures::executor::block_on;
@@ -33,7 +34,7 @@ impl<'a> Sender<'a> for TauriSender {
     type OwnedSender = TauriOwnedSender;
 
     fn subscription(self) -> SubscriptionUpgrade<'a, Self> {
-        SubscriptionUpgrade::Supported(TauriOwnedSender(self.0.clone()), self.1)
+        SubscriptionUpgrade::Supported(TauriOwnedSender(self.0.clone(), Instant::now()), self.1)
     }
 
     fn send(self, resp: jsonrpc::Response) -> Self::SendFut {
@@ -50,7 +51,7 @@ impl<'a> Sender<'a> for TauriSender {
     }
 }
 
-pub struct TauriOwnedSender(Window<Wry>);
+pub struct TauriOwnedSender(Window<Wry>, Instant);
 
 impl OwnedSender for TauriOwnedSender {
     type SendFut<'a> = Ready<()>;
@@ -63,6 +64,8 @@ impl OwnedSender for TauriOwnedSender {
                 tracing::error!("failed to emit JSON-RPC response: {}", err);
             })
             .ok();
+
+        // println!("TauriOwnedSender - sent {:?}", self.1.elapsed()); // This is for subscriptions not useful data
         ready(())
     }
 }
@@ -112,6 +115,14 @@ where
             window.listen("plugin:rspc:transport", {
                 let window = window.clone();
                 move |event| {
+                    println!(
+                        "tauri-ipc-listener - {:?}",
+                        SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .expect("Time went backwards")
+                            .as_millis()
+                    );
+
                     let time = std::time::Instant::now();
 
                     let reqs = match event.payload() {
