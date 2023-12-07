@@ -4,6 +4,7 @@ use std::{
     pin::Pin,
     sync::Arc,
     task::{Context, Poll},
+    time::Instant,
 };
 
 use futures::Stream;
@@ -357,6 +358,7 @@ where
             PinnedOption::None,
             None,
             PinnedOption::None,
+            Instant::now(),
         ))
     }
 }
@@ -377,6 +379,7 @@ pub struct MiddlewareFutOrSomething<
     #[pin] PinnedOption<TMiddleware::Stream<'a>>,
     Option<<TNewMiddleware::Result as MwV2Result>::Resp>,
     #[pin] PinnedOption<<<TNewMiddleware::Result as MwV2Result>::Resp as Executable2>::Fut>,
+    Instant,
 );
 
 impl<
@@ -394,6 +397,7 @@ impl<
         match this.0.as_mut().project() {
             PinnedOptionProj::Some(fut) => match fut.poll(cx) {
                 Poll::Ready(result) => {
+                    println!("\t\t this.0 ready - {:?}", this.5.elapsed());
                     this.0.set(PinnedOption::None);
 
                     let (ctx, input, req, resp) = result.explode()?;
@@ -412,6 +416,8 @@ impl<
         match this.4.as_mut().project() {
             PinnedOptionProj::Some(fut) => match fut.poll(cx) {
                 Poll::Ready(result) => {
+                    println!("\t\t this.4 ready - {:?}", this.5.elapsed());
+
                     this.4.set(PinnedOption::None);
 
                     return Poll::Ready(Some(Ok(result)));
@@ -425,6 +431,8 @@ impl<
             PinnedOptionProj::Some(fut) => {
                 match fut.poll_next(cx) {
                     Poll::Ready(result) => {
+                        println!("\t\t this.2 ready - {:?}", this.5.elapsed());
+
                         match this.3.take() {
                             Some(resp) => {
                                 // TODO: Deal with this -> The `resp` handler should probs take in the whole `Result`?

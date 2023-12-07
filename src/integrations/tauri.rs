@@ -37,6 +37,7 @@ impl<'a> Sender<'a> for TauriSender {
     }
 
     fn send(self, resp: jsonrpc::Response) -> Self::SendFut {
+        let time = std::time::Instant::now();
         self.0
             .emit("plugin:rspc:transport:resp", resp)
             .map_err(|err| {
@@ -44,6 +45,7 @@ impl<'a> Sender<'a> for TauriSender {
                 tracing::error!("failed to emit JSON-RPC response: {}", err);
             })
             .ok();
+        println!("plugin:rspc:transport - send - {:?}", time.elapsed());
         ready(())
     }
 }
@@ -110,6 +112,8 @@ where
             window.listen("plugin:rspc:transport", {
                 let window = window.clone();
                 move |event| {
+                    let time = std::time::Instant::now();
+
                     let reqs = match event.payload() {
                         Some(v) => {
                             let v = match serde_json::from_str::<serde_json::Value>(v) {
@@ -157,18 +161,40 @@ where
                         }
                     };
 
+                    println!("plugin:rspc:transport - decoded - {:?}", time.elapsed());
+
                     for req in reqs {
                         let ctx = (self.ctx_fn)(window.clone());
                         let router = self.router.clone();
                         let window = window.clone();
 
-                        spawn(handle_json_rpc(
+                        let req2 = req.clone();
+                        let fut = handle_json_rpc(
                             ctx,
                             req,
                             Cow::Owned(router),
                             TauriSender(window, subscriptions.clone()),
-                        ));
+                        );
+                        spawn(async move {
+                            println!(
+                                "plugin:rspc:transport - thread({:?}) - start - {:?}",
+                                req2,
+                                time.elapsed()
+                            );
+                            let time = std::time::Instant::now();
+
+                            let result = fut.await;
+
+                            println!(
+                                "plugin:rspc:transport - thread({:?}) - end - {:?}",
+                                req2,
+                                time.elapsed()
+                            );
+                            result
+                        });
                     }
+
+                    println!("plugin:rspc:transport - {:?}", time.elapsed());
                 }
             });
         }

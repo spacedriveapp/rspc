@@ -149,6 +149,8 @@ where
     TMeta: Send + Sync + 'static,
 {
     async move {
+        let time = std::time::Instant::now();
+        println!("\thandle_json_rpc - start");
         if req.jsonrpc.is_some() && req.jsonrpc.as_deref() != Some("2.0") {
             sender
                 .send(jsonrpc::Response {
@@ -169,6 +171,8 @@ where
                     .ok_or_else(|| ExecError::OperationNotFound(path.clone()))
                 {
                     Ok(op) => {
+                        println!("\thandle_json_rpc - got op - {:?}", time.elapsed());
+
                         let mut stream = match op
                             .exec
                             .call(
@@ -197,6 +201,8 @@ where
                             }
                         };
 
+                        println!("\thandle_json_rpc - executed chain - {:?}", time.elapsed());
+
                         // // TODO: Middleware could mess with this assumption so think about that.
                         // match stream.size_hint() {
                         //     (1, Some(1)) => {}
@@ -208,7 +214,7 @@ where
                         //     }
                         // }
 
-                        match stream.next().await.unwrap() {
+                        let y = match stream.next().await.unwrap() {
                             Ok(v) => {
                                 sender
                                     .send(jsonrpc::Response {
@@ -231,7 +237,14 @@ where
                                     .await;
                                 return;
                             }
-                        }
+                        };
+
+                        println!(
+                            "\thandle_json_rpc - polled stream for result - {:?}",
+                            time.elapsed()
+                        );
+
+                        y
                     }
                     Err(err) => {
                         #[cfg(feature = "tracing")]
