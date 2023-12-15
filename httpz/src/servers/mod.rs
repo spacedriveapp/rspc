@@ -26,10 +26,6 @@ pub mod lambda;
 #[cfg(feature = "workers")]
 pub mod workers;
 
-/// support for [Tauri](https://tauri.app)
-#[cfg(feature = "tauri")]
-pub mod tauri;
-
 /// support for [Hyper](https://github.com/hyperium/hyper)
 #[cfg(feature = "hyper")]
 pub mod hyper;
