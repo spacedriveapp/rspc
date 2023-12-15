@@ -12,7 +12,7 @@ use serde_json::Value;
 use tauri::{
     async_runtime::spawn,
     plugin::{Builder, TauriPlugin},
-    Window, WindowEvent, Wry,
+    Manager, Window, WindowEvent, Wry,
 };
 use tokio::sync::oneshot;
 
@@ -110,49 +110,39 @@ where
             window.listen("plugin:rspc:transport", {
                 let window = window.clone();
                 move |event| {
-                    let reqs = match event.payload() {
-                        Some(v) => {
-                            let v = match serde_json::from_str::<serde_json::Value>(v) {
-                                Ok(v) => match v {
-                                    Value::String(s) => {
-                                        match serde_json::from_str::<serde_json::Value>(&s) {
-                                            Ok(v) => v,
-                                            Err(err) => {
-                                                #[cfg(feature = "tracing")]
-                                                tracing::error!(
-                                                    "failed to parse JSON-RPC request: {}",
-                                                    err
-                                                );
-                                                return;
-                                            }
-                                        }
+                    let v = match serde_json::from_str::<serde_json::Value>(event.payload()) {
+                        Ok(v) => match v {
+                            Value::String(s) => {
+                                match serde_json::from_str::<serde_json::Value>(&s) {
+                                    Ok(v) => v,
+                                    Err(err) => {
+                                        #[cfg(feature = "tracing")]
+                                        tracing::error!(
+                                            "failed to parse JSON-RPC request: {}",
+                                            err
+                                        );
+                                        return;
                                     }
-                                    v => v,
-                                },
-                                Err(err) => {
-                                    #[cfg(feature = "tracing")]
-                                    tracing::error!("failed to parse JSON-RPC request: {}", err);
-                                    return;
-                                }
-                            };
-
-                            match if v.is_array() {
-                                serde_json::from_value::<Vec<jsonrpc::Request>>(v)
-                            } else {
-                                serde_json::from_value::<jsonrpc::Request>(v).map(|v| vec![v])
-                            } {
-                                Ok(v) => v,
-                                Err(err) => {
-                                    #[cfg(feature = "tracing")]
-                                    tracing::error!("failed to parse JSON-RPC request: {}", err);
-                                    return;
                                 }
                             }
-                        }
-                        None => {
+                            v => v,
+                        },
+                        Err(err) => {
                             #[cfg(feature = "tracing")]
-                            tracing::error!("Tauri event payload is empty");
+                            tracing::error!("failed to parse JSON-RPC request: {}", err);
+                            return;
+                        }
+                    };
 
+                    let reqs = match if v.is_array() {
+                        serde_json::from_value::<Vec<jsonrpc::Request>>(v)
+                    } else {
+                        serde_json::from_value::<jsonrpc::Request>(v).map(|v| vec![v])
+                    } {
+                        Ok(v) => v,
+                        Err(err) => {
+                            #[cfg(feature = "tracing")]
+                            tracing::error!("failed to parse JSON-RPC request: {}", err);
                             return;
                         }
                     };
