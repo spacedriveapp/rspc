@@ -185,8 +185,8 @@ importers:
         specifier: workspace:*
         version: link:../config
       '@tauri-apps/api':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^2.0.0-alpha.12
+        version: 2.0.0-alpha.12
       rollup:
         specifier: ^3.21.2
         version: 3.21.2
@@ -2067,9 +2067,9 @@ packages:
       '@tanstack/query-core': 4.29.5
       solid-js: 1.7.3
 
-  /@tauri-apps/api@1.2.0:
-    resolution: {integrity: sha512-lsI54KI6HGf7VImuf/T9pnoejfgkNoXveP14pVV7XarrQ46rOejIVJLFqHI9sRReJMGdh2YuCoI3cc/yCWCsrw==}
-    engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
+  /@tauri-apps/api@2.0.0-alpha.12:
+    resolution: {integrity: sha512-acpNZQxFgHMHC5qV/IUg4IL/xmypzfxHB4ECkwb58fT48H4zBmklNd5TC0k7BvLUBoSmmgHc4InbYwQai392Yw==}
+    engines: {node: '>= 18', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
     dev: true
 
   /@types/babel__core@7.20.0:
