@@ -2,7 +2,7 @@ import {
   AlphaRSPCError,
   Link,
   RspcRequest,
-} from "@oscartbeaumont-sd/client/v2";
+} from "@oscartbeaumont-sd/rspc-client/v2";
 import { listen } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
 

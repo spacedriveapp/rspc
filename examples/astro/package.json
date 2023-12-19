@@ -1,5 +1,5 @@
 {
-  "name": "@oscartbeaumont-sd/examples-astro",
+  "name": "@oscartbeaumont-sd/rspc-examples-astro",
   "version": "0.0.0",
   "description": "A project to test the RSPC frontend libraries",
   "keywords": [],
@@ -10,9 +10,9 @@
     "dev": "astro dev"
   },
   "dependencies": {
-    "@oscartbeaumont-sd/client": "workspace:*",
-    "@oscartbeaumont-sd/react": "workspace:*",
-    "@oscartbeaumont-sd/solid": "workspace:*",
+    "@oscartbeaumont-sd/rspc-client": "workspace:*",
+    "@oscartbeaumont-sd/rspc-react": "workspace:*",
+    "@oscartbeaumont-sd/rspc-solid": "workspace:*",
     "@tanstack/react-query": "^4.29.5",
     "@tanstack/solid-query": "^4.29.5",
     "astro": "2.3.2",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@astrojs/react": "^2.1.1",
     "@astrojs/solid-js": "^2.1.0",
-    "@oscartbeaumont-sd/config": "workspace:*",
+    "@oscartbeaumont-sd/rspc-config": "workspace:*",
     "@types/react": "^18.2.0",
     "typescript": "^5.0.4"
   },

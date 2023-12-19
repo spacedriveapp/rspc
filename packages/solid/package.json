@@ -1,5 +1,5 @@
 {
-  "name": "@oscartbeaumont-sd/solid",
+  "name": "@oscartbeaumont-sd/rspc-solid",
   "version": "0.1.3",
   "description": "A blazingly fast and easy to use TRPC-like server for Rust.",
   "keywords": [],
@@ -28,8 +28,8 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@oscartbeaumont-sd/client": "workspace:*",
-    "@oscartbeaumont-sd/config": "workspace:*",
+    "@oscartbeaumont-sd/rspc-client": "workspace:*",
+    "@oscartbeaumont-sd/rspc-config": "workspace:*",
     "@tanstack/solid-query": "^4.29.5",
     "rollup": "^3.21.2",
     "rollup-preset-solid": "^2.0.1",
@@ -39,7 +39,7 @@
     "vitest": "^0.30.1"
   },
   "peerDependencies": {
-    "@oscartbeaumont-sd/client": "workspace:*",
+    "@oscartbeaumont-sd/rspc-client": "workspace:*",
     "@tanstack/solid-query": "^4.6.0",
     "solid-js": "^1.6.11"
   }

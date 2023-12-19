@@ -10,13 +10,13 @@ importers:
 
   examples/astro:
     dependencies:
-      '@oscartbeaumont-sd/client':
+      '@oscartbeaumont-sd/rspc-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@oscartbeaumont-sd/react':
+      '@oscartbeaumont-sd/rspc-react':
         specifier: workspace:*
         version: link:../../packages/react
-      '@oscartbeaumont-sd/solid':
+      '@oscartbeaumont-sd/rspc-solid':
         specifier: workspace:*
         version: link:../../packages/solid
       '@tanstack/react-query':
@@ -44,7 +44,7 @@ importers:
       '@astrojs/solid-js':
         specifier: ^2.1.0
         version: 2.1.0(@babel/core@7.21.8)(solid-js@1.7.3)
-      '@oscartbeaumont-sd/config':
+      '@oscartbeaumont-sd/rspc-config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/react':
@@ -56,7 +56,7 @@ importers:
 
   packages/client:
     devDependencies:
-      '@oscartbeaumont-sd/config':
+      '@oscartbeaumont-sd/rspc-config':
         specifier: workspace:*
         version: link:../config
       rollup:
@@ -117,10 +117,10 @@ importers:
 
   packages/react:
     devDependencies:
-      '@oscartbeaumont-sd/client':
+      '@oscartbeaumont-sd/rspc-client':
         specifier: workspace:*
         version: link:../client
-      '@oscartbeaumont-sd/config':
+      '@oscartbeaumont-sd/rspc-config':
         specifier: workspace:*
         version: link:../config
       '@tanstack/react-query':
@@ -147,10 +147,10 @@ importers:
 
   packages/solid:
     devDependencies:
-      '@oscartbeaumont-sd/client':
+      '@oscartbeaumont-sd/rspc-client':
         specifier: workspace:*
         version: link:../client
-      '@oscartbeaumont-sd/config':
+      '@oscartbeaumont-sd/rspc-config':
         specifier: workspace:*
         version: link:../config
       '@tanstack/solid-query':
@@ -177,11 +177,11 @@ importers:
 
   packages/tauri:
     dependencies:
-      '@oscartbeaumont-sd/client':
+      '@oscartbeaumont-sd/rspc-client':
         specifier: workspace:*
         version: link:../client
     devDependencies:
-      '@oscartbeaumont-sd/config':
+      '@oscartbeaumont-sd/rspc-config':
         specifier: workspace:*
         version: link:../config
       '@tauri-apps/api':

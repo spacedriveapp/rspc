@@ -1,5 +1,5 @@
 {
-  "name": "@oscartbeaumont-sd/tauri",
+  "name": "@oscartbeaumont-sd/rspc-tauri",
   "version": "0.1.3",
   "description": "A blazingly fast and easy to use TRPC-like server for Rust.",
   "keywords": [],
@@ -36,10 +36,10 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@oscartbeaumont-sd/client": "workspace:*"
+    "@oscartbeaumont-sd/rspc-client": "workspace:*"
   },
   "devDependencies": {
-    "@oscartbeaumont-sd/config": "workspace:*",
+    "@oscartbeaumont-sd/rspc-config": "workspace:*",
     "@tauri-apps/api": "^1.2.0",
     "rollup": "^3.21.2",
     "typescript": "^5.0.4",

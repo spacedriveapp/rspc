@@ -104,7 +104,7 @@ jobs:
 
       - name: Publish main to npm
         if: github.ref == 'refs/heads/main'
-        run: pnpm publish -r ${TAG} --no-git-checks --filter "@oscartbeaumont-sd/*" --access public
+        run: pnpm publish -r ${TAG} --no-git-checks --filter "@oscartbeaumont-sd/rspc-*" --access public
         env:
           TAG: ${{ (github.ref == 'refs/heads/main' && '--tag=main') || '' }}
 
@@ -114,6 +114,6 @@ jobs:
 
       # - name: Publish release to npm
       #   if: github.ref_type == 'tag'
-      #   run: pnpm publish -r ${TAG} --no-git-checks --filter "@oscartbeaumont-sd/*" --access public
+      #   run: pnpm publish -r ${TAG} --no-git-checks --filter "@oscartbeaumont-sd/rspc-*" --access public
       #   env:
       #     TAG: ${{ (contains(github.ref_name, '-beta.') && '--tag=beta') || ''}}

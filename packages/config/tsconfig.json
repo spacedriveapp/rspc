@@ -14,13 +14,13 @@
     "importHelpers": true,
     "skipLibCheck": true,
     "paths": {
-      "@oscartbeaumont-sd/client": ["../client/src"],
-      "@oscartbeaumont-sd/client/full": ["../client/src/full"],
-      "@oscartbeaumont-sd/client/v2": ["../client/src/v2"],
-      "@oscartbeaumont-sd/react": ["../react/src"],
-      "@oscartbeaumont-sd/react/v2": ["../react/src/v2"],
-      "@oscartbeaumont-sd/solid": ["../solid/src"],
-      "@oscartbeaumont-sd/tauri": ["../tauri/src"]
+      "@oscartbeaumont-sd/rspc-client": ["../client/src"],
+      "@oscartbeaumont-sd/rspc-client/full": ["../client/src/full"],
+      "@oscartbeaumont-sd/rspc-client/v2": ["../client/src/v2"],
+      "@oscartbeaumont-sd/rspc-react": ["../react/src"],
+      "@oscartbeaumont-sd/rspc-react/v2": ["../react/src/v2"],
+      "@oscartbeaumont-sd/rspc-solid": ["../solid/src"],
+      "@oscartbeaumont-sd/rspc-tauri": ["../tauri/src"]
     }
   },
   "include": ["./getRollupConfig.ts"]

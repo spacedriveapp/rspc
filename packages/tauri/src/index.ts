@@ -3,7 +3,7 @@ import {
   OperationType,
   Transport,
   RSPCError,
-} from "@oscartbeaumont-sd/client";
+} from "@oscartbeaumont-sd/rspc-client";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
 

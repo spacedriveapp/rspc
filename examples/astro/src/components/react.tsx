@@ -2,8 +2,8 @@ import {
   createClient,
   FetchTransport,
   WebsocketTransport,
-} from "@oscartbeaumont-sd/client";
-import { createReactQueryHooks } from "@oscartbeaumont-sd/react";
+} from "@oscartbeaumont-sd/rspc-client";
+import { createReactQueryHooks } from "@oscartbeaumont-sd/rspc-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useState } from "react";
 

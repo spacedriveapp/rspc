@@ -19,7 +19,7 @@ import {
   RSPCError,
   _inferInfiniteQueryProcedureHandlerInput,
   _inferProcedureHandlerInput,
-} from "@oscartbeaumont-sd/client";
+} from "@oscartbeaumont-sd/rspc-client";
 import {
   QueryClient,
   CreateQueryOptions,

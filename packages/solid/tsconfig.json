@@ -1,5 +1,5 @@
 {
-  "extends": "@oscartbeaumont-sd/config/tsconfig.json",
+  "extends": "@oscartbeaumont-sd/rspc-config/tsconfig.json",
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "solid-js",

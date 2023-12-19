@@ -4,8 +4,8 @@ import {
   Client,
   createClient,
   NoOpTransport,
-} from "@oscartbeaumont-sd/client";
-import { createReactQueryHooks } from "@oscartbeaumont-sd/react";
+} from "@oscartbeaumont-sd/rspc-client";
+import { createReactQueryHooks } from "@oscartbeaumont-sd/rspc-react";
 import { QueryClient } from "@tanstack/react-query";
 import { Procedures } from "./bindings";
 

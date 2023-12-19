@@ -4,8 +4,8 @@ import {
   Client,
   createClient,
   NoOpTransport,
-} from "@oscartbeaumont-sd/client";
-import { createSolidQueryHooks } from "@oscartbeaumont-sd/solid";
+} from "@oscartbeaumont-sd/rspc-client";
+import { createSolidQueryHooks } from "@oscartbeaumont-sd/rspc-solid";
 import { QueryClient } from "@tanstack/solid-query";
 import { Procedures } from "./bindings";
 
