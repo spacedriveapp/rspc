@@ -1,5 +1,9 @@
-import { initRspc, httpBatchLink, wsBatchLink } from "@rspc/client/v2";
-import { createReactQueryHooks } from "@rspc/react/v2";
+import {
+  initRspc,
+  httpBatchLink,
+  wsBatchLink,
+} from "@oscartbeaumont-sd/client/v2";
+import { createReactQueryHooks } from "@oscartbeaumont-sd/react/v2";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useState } from "react";
 

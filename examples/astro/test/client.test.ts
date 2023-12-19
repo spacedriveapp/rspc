@@ -11,8 +11,8 @@ import {
   inferInfiniteQueries,
   inferInfiniteQueryResult,
   inferInfiniteQueryInput,
-} from "@rspc/client";
-import { createReactQueryHooks } from "@rspc/react";
+} from "@oscartbeaumont-sd/client";
+import { createReactQueryHooks } from "@oscartbeaumont-sd/react";
 import { MyPaginatedData, Procedures } from "./bindings";
 
 export const rspc = createReactQueryHooks<Procedures>();

@@ -1,7 +1,7 @@
 /** @jsxImportSource solid-js */
 
-// import { createClient, FetchTransport } from "@rspc/client";
-// import { createSolidQueryHooks } from "@rspc/solid";
+// import { createClient, FetchTransport } from "@oscartbeaumont-sd/client";
+// import { createSolidQueryHooks } from "@oscartbeaumont-sd/solid";
 // import { QueryClient } from "@tanstack/solid-query";
 
 // Export from Rust. Run `cargo run -p example-axum` to start server and export it!

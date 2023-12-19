@@ -34,7 +34,7 @@ import {
   inferMutationInput,
   inferSubscriptionResult,
   ProceduresDef,
-} from "@rspc/client";
+} from "@oscartbeaumont-sd/client";
 
 export interface BaseOptions<TProcedures extends ProceduresDef> {
   rspc?: {

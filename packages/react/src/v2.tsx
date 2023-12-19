@@ -29,8 +29,8 @@ import {
   inferMutationInput,
   ProceduresDef,
   inferProcedureResult,
-} from "@rspc/client";
-import { AlphaClient, AlphaRSPCError } from "@rspc/client/v2";
+} from "@oscartbeaumont-sd/client";
+import { AlphaClient, AlphaRSPCError } from "@oscartbeaumont-sd/client/v2";
 
 // TODO: Reuse one from client but don't export it in public API
 type KeyAndInput = [string] | [string, any];

@@ -1,4 +1,9 @@
-import { randomId, OperationType, Transport, RSPCError } from "@rspc/client";
+import {
+  randomId,
+  OperationType,
+  Transport,
+  RSPCError,
+} from "@oscartbeaumont-sd/client";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
 

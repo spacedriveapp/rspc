@@ -63,7 +63,7 @@ export function buildConfig(input: string | string[]): RollupOptions[] {
         visualizer({
           gzipSize: true,
           brotliSize: true,
-          // TODO: Support for viewing the bundle size of `@rspc/client/full`
+          // TODO: Support for viewing the bundle size of `@oscartbeaumont-sd/client/full`
         }),
       ],
     },

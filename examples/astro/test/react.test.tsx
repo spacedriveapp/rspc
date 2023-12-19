@@ -1,6 +1,11 @@
 import React from "react";
-import { RSPCError, Client, createClient, NoOpTransport } from "@rspc/client";
-import { createReactQueryHooks } from "@rspc/react";
+import {
+  RSPCError,
+  Client,
+  createClient,
+  NoOpTransport,
+} from "@oscartbeaumont-sd/client";
+import { createReactQueryHooks } from "@oscartbeaumont-sd/react";
 import { QueryClient } from "@tanstack/react-query";
 import { Procedures } from "./bindings";
 
