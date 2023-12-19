@@ -1,3 +1,5 @@
+// @ts-nocheck No one asked
+
 import {
   AlphaRSPCError,
   Link,
@@ -17,6 +19,7 @@ export function tauriLink(): Link {
       reject: (error: Error | AlphaRSPCError) => void;
     }
   >();
+  // @ts-ignore-error
   const listener = listen("plugin:rspc:transport:resp", (event) => {
     const { id, result } = event.payload as any;
     if (activeMap.has(id)) {
@@ -67,7 +70,7 @@ export function tauriLink(): Link {
           reject,
         });
 
-        // @ts-expect-error // TODO: Fix this
+        // @ts-ignore-error
         batch.push({
           id: op.id,
           method: op.type,

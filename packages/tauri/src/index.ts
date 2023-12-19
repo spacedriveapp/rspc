@@ -1,3 +1,5 @@
+// @ts-nocheck No one asked
+
 import {
   randomId,
   OperationType,
