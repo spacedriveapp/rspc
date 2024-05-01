@@ -191,15 +191,15 @@ where
 {
     let manager = WindowManager::new(move |_| ctx_fn(), router);
     Builder::new("rspc")
-        .on_page_load(move |window, _page| {
-            manager.clone().on_page_load(window.clone());
+        .on_page_load(move |webview, _page| {
+            manager.clone().on_page_load(webview.window());
 
-            window.on_window_event({
-                let window = window.clone();
+            webview.window().on_window_event({
+                let webview = webview.clone();
                 let manager = manager.clone();
                 move |event| match event {
                     WindowEvent::CloseRequested { .. } => {
-                        manager.close_requested(&window);
+                        manager.close_requested(&webview.window());
                     }
                     _ => {}
                 }
@@ -218,15 +218,15 @@ where
 {
     let manager = WindowManager::new(ctx_fn, router);
     Builder::new("rspc")
-        .on_page_load(move |window, _page| {
-            manager.clone().on_page_load(window.clone());
+        .on_page_load(move |webview, _page| {
+            manager.clone().on_page_load(webview.window());
 
-            window.on_window_event({
-                let window = window.clone();
+            webview.window().on_window_event({
+                let webview = webview.clone();
                 let manager = manager.clone();
                 move |event| match event {
                     WindowEvent::CloseRequested { .. } => {
-                        manager.close_requested(&window);
+                        manager.close_requested(&webview.window());
                     }
                     _ => {}
                 }

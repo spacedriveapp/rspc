@@ -28,7 +28,7 @@ alpha = []    # APIs that are not yet stable
 unstable = [] # APIs where one line of code can blow up your whole app
 
 # Webservers
-axum = ["httpz", "httpz/axum", "httpz/tokio-ws", "httpz/axum"]
+axum = ["dep:httpz", "httpz/axum", "httpz/tokio-ws", "httpz/axum"]
 
 # Specta # TODO: Remove all of these with v1
 uuid = ["specta/uuid"]
@@ -46,26 +46,20 @@ bytesize = ["specta/bytesize"]
 glam = ["specta/glam"]
 
 [dependencies]
-specta = { git = "https://github.com/oscartbeaumont/specta", rev = "673e3f55d246cd90e70c706ba4ca7f5818e99ba9", features = [
-    "serde",
-    "serde_json",
-    "typescript",
-    "tokio",
-] }
+specta = { version = "=2.0.0-rc.11", features = ["serde", "serde_json", "typescript", "tokio"] }
 httpz = { path = "./httpz", optional = true }
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = "1.0.95"
 thiserror = "1.0.40"
 futures = "0.3.28"
 tokio = { version = "1.27.0", features = ["sync", "rt", "macros"] }
-tauri = { version = "=2.0.0-alpha.18", optional = true }
+tauri = { version = "=2.0.0-beta.17", optional = true }
 tracing = { version = "0.1.37", optional = true }
-worker = { version = "0.0.15", optional = true }
 anyhow = { version = "1", optional = true }
 futures-locks = { version = "0.7.1", features = ["tokio"] }
 futures-channel = "0.3.28"
 nougat = "0.2.4"
-pin-project = "1.0.12" # TODO: Move to `pin-project-lite`
+pin-project = "1.0.12"
 
 [dev-dependencies]
 # Tests
