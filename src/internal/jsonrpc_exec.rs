@@ -229,7 +229,6 @@ where
                                         result: ResponseInner::Error(err.into()),
                                     })
                                     .await;
-                                return;
                             }
                         }
                     }
@@ -315,7 +314,6 @@ where
                                         result: ResponseInner::Error(err.into()),
                                     })
                                     .await;
-                                return;
                             }
                         }
                     }
@@ -409,7 +407,7 @@ where
                                 sender
                                     .send(jsonrpc::Response {
                                         jsonrpc: "2.0",
-                                        id: id,
+                                        id,
                                         result: ResponseInner::Error(err.into()),
                                     })
                                     .await;
@@ -479,12 +477,12 @@ where
                         .await;
                 }
             },
-        };
+        }
     }
 }
 
 // TODO: Can this we removed?
-fn to_owned<'a, T>(arc: Cow<'a, Arc<T>>) -> Arc<T> {
+fn to_owned<T>(arc: Cow<'_, Arc<T>>) -> Arc<T> {
     match arc {
         Cow::Borrowed(arc) => arc.to_owned(),
         Cow::Owned(arc) => arc,

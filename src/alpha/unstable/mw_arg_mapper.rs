@@ -25,6 +25,12 @@ pub trait MwArgMapper: Send + Sync {
 
 pub struct MwArgMapperMiddleware<M: MwArgMapper>(PhantomData<M>);
 
+impl<M: MwArgMapper + 'static> Default for MwArgMapperMiddleware<M> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<M: MwArgMapper + 'static> MwArgMapperMiddleware<M> {
     pub const fn new() -> Self {
         Self(PhantomData)

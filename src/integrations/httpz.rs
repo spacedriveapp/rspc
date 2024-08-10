@@ -10,7 +10,6 @@ use serde_json::Value;
 use std::{
     borrow::Cow,
     collections::HashMap,
-    mem,
     sync::{Arc, Mutex},
 };
 
@@ -202,7 +201,7 @@ impl Request {
     pub fn cookies(&mut self) -> Option<CookieJar> {
         // TODO: This take means a `None` response could be because it was already used or because it's a websocket. This is a confusing DX and needs fixing.
 
-        mem::replace(&mut self.1, None)
+        self.1.take()
     }
 
     /// query_pairs returns an iterator of the query parameters.

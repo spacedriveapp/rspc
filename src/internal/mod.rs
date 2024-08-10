@@ -19,6 +19,7 @@ pub use procedure_store::*;
 pub use specta;
 
 #[cfg(test)]
+#[cfg(not(feature = "unstable"))]
 mod tests {
     use std::{fs::File, io::Write, path::PathBuf};
 

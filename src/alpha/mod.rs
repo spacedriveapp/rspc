@@ -25,6 +25,7 @@ pub use crate::alpha_stable::*;
 pub mod unstable;
 
 #[cfg(test)]
+#[cfg(feature = "unstable")]
 mod tests {
     use std::{path::PathBuf, time::Duration};
 
@@ -178,7 +179,7 @@ mod tests {
             ))
             .query(|ctx, _: ()| {
                 println!("TODO: {:?}", ctx);
-                let _ = ctx.0; // Test Rust inference is working
+                ctx.0; // Test Rust inference is working
                 Ok(())
             });
     }
@@ -231,7 +232,7 @@ mod tests {
             ))
             .query(|_, _: i32| Ok(()));
 
-        let _r = R
+        R
             .router()
             .procedure("demo", p)
             .compat()

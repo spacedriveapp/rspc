@@ -39,6 +39,12 @@ impl<T> RequestLayerMarker<T> {
 #[doc(hidden)]
 pub struct StreamLayerMarker<T>(PhantomData<T>);
 
+impl<T> Default for StreamLayerMarker<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> StreamLayerMarker<T> {
     pub fn new() -> Self {
         Self(Default::default())

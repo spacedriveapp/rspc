@@ -53,7 +53,7 @@ serde_json = "1.0.95"
 thiserror = "1.0.40"
 futures = "0.3.28"
 tokio = { version = "1.27.0", features = ["sync", "rt", "macros"] }
-tauri = { version = "=2.0.0-beta.17", optional = true }
+tauri = { version = "=2.0.0-rc.2", optional = true }
 tracing = { version = "0.1.37", optional = true }
 anyhow = { version = "1", optional = true }
 futures-locks = { version = "0.7.1", features = ["tokio"] }
@@ -71,4 +71,4 @@ pprof = { version = "0.11.1", features = ["flamegraph", "criterion", "protobuf-c
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
 
 [workspace]
-members = ["./httpz", "./examples", "./examples/axum"]
+members = ["./httpz"]

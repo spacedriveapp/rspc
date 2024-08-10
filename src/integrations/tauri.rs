@@ -3,7 +3,6 @@ use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     future::{ready, Ready},
     hash::{Hash, Hasher},
-    marker::PhantomData,
     sync::{Arc, Mutex},
 };
 
@@ -12,7 +11,7 @@ use serde_json::Value;
 use tauri::{
     async_runtime::spawn,
     plugin::{Builder, TauriPlugin},
-    Manager, Window, WindowEvent, Wry,
+    Emitter, Listener, Window, WindowEvent, Wry,
 };
 use tokio::sync::oneshot;
 
@@ -197,11 +196,10 @@ where
             webview.window().on_window_event({
                 let webview = webview.clone();
                 let manager = manager.clone();
-                move |event| match event {
-                    WindowEvent::CloseRequested { .. } => {
+                move |event| {
+                    if let WindowEvent::CloseRequested { .. } = event {
                         manager.close_requested(&webview.window());
                     }
-                    _ => {}
                 }
             })
         })
@@ -224,11 +222,10 @@ where
             webview.window().on_window_event({
                 let webview = webview.clone();
                 let manager = manager.clone();
-                move |event| match event {
-                    WindowEvent::CloseRequested { .. } => {
+                move |event| {
+                    if let WindowEvent::CloseRequested { .. } = event {
                         manager.close_requested(&webview.window());
                     }
-                    _ => {}
                 }
             })
         })

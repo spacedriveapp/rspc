@@ -21,6 +21,15 @@ where
     dangerously_map_types: Option<Box<dyn FnOnce(&mut TypeMap) + Send + Sync + 'static>>,
 }
 
+impl<TCtx> Default for AlphaRouter<TCtx>
+where
+    TCtx: Send + Sync + 'static,
+ {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<TCtx> AlphaRouter<TCtx>
 where
     TCtx: Send + Sync + 'static,
