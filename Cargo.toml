@@ -49,7 +49,6 @@ glam = ["specta/glam"]
 specta = { version = "=2.0.0-rc.20", features = ["derive", "serde", "serde_json"] }
 specta-serde = { version = "=0.0.7" }
 specta-typescript = { version = "=0.0.7", features = ["function"] }
-specta-zod = { git = "https://github.com/spacedriveapp/specta", rev = "dcdc9e5" }
 specta-datatype-from = { git = "https://github.com/spacedriveapp/specta", rev = "dcdc9e5" }
 httpz = { path = "./httpz", optional = true }
 serde = { version = "1.0.205", features = ["derive"] }

@@ -89,7 +89,7 @@ pub enum ExportError {
     #[error("IO error exporting bindings: {0}")]
     IOErr(#[from] std::io::Error),
     #[error("error exporting typescript bindings: {0}")]
-    TsExportErr(#[from] specta_zod::ExportError),
+    TsExportErr(#[from] specta_typescript::ExportError),
 }
 
 #[derive(Debug, Clone, Serialize, Type)]
