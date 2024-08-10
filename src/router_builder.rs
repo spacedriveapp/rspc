@@ -1,7 +1,8 @@
 use std::{borrow::Cow, marker::PhantomData, panic::Location, process};
 
 use serde::de::DeserializeOwned;
-use specta::{ts, Type, TypeMap};
+use specta::{Type, TypeMap};
+use specta_typescript as ts;
 
 use crate::{
     internal::{

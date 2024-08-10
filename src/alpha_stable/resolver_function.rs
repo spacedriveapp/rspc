@@ -1,7 +1,8 @@
 use std::{borrow::Cow, marker::PhantomData};
 
 use serde::de::DeserializeOwned;
-use specta::{ts, Type, TypeMap};
+use specta::{Type, TypeMap};
+use specta_typescript as ts;
 
 use crate::{alpha_stable::AlphaRequestLayer, internal::ProcedureDataType};
 

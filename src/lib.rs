@@ -40,10 +40,6 @@ pub use selection::*;
 pub mod integrations;
 pub mod internal;
 
-// #[deprecated = "Being removed in `v1.0.0`. Import this directly from the 'specta' crate."] // TODO
-#[cfg(not(feature = "unstable"))]
-pub use specta::RSPCType as Type;
-
 #[cfg(debug_assertions)]
 #[allow(clippy::panic)]
 // #[deprecated = "Being removed in `v1.0.0`. You can copy this helper into your own codebase if you still need it."] // TODO
