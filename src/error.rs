@@ -13,9 +13,6 @@ pub enum ExecError {
     DeserializingArgErr(serde_json::Error),
     #[error("error serializing procedure result: {0}")]
     SerializingResultErr(serde_json::Error),
-    #[cfg(feature = "axum")]
-    #[error("error in axum extractor")]
-    AxumExtractorError,
     #[error("invalid JSON-RPC version")]
     InvalidJsonRpcVersion,
     #[error("method '{0}' is not supported by this endpoint.")] // TODO: Better error message
@@ -45,12 +42,6 @@ impl From<ExecError> for Error {
                 code: ErrorCode::InternalServerError,
                 message: "error serializing procedure result".to_string(),
                 cause: Some(Arc::new(err)),
-            },
-            #[cfg(feature = "axum")]
-            ExecError::AxumExtractorError => Error {
-                code: ErrorCode::BadRequest,
-                message: "Error running Axum extractors on the HTTP request".into(),
-                cause: None,
             },
             ExecError::InvalidJsonRpcVersion => Error {
                 code: ErrorCode::BadRequest,
