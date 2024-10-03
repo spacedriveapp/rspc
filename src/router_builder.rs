@@ -31,17 +31,20 @@ pub fn is_invalid_procedure_name(s: &str) -> bool {
 pub(crate) fn is_invalid_router_prefix(s: &str) -> (String, bool) {
     // TODO: Prevent Typescript reserved keywords
 
+    if s.is_empty() {
+        return (s.to_owned(), false);
+    }
+
     let s = if s.ends_with('.') {
         s.to_owned()
     } else {
         format!("{}.", s)
     };
 
-    let is_valid = s.is_empty()
-        || s == "ws."
+    let is_valid = s == "ws."
         || s.starts_with("rpc.")
         || s.starts_with("rspc.")
-        || !s
+        || !s[..s.len() - 1]
             .chars()
             .all(|c| c.is_alphabetic() || c.is_numeric() || c == '_');
 
