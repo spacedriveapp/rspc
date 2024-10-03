@@ -7,7 +7,7 @@ use async_tungstenite::{self, tokio::TokioAdapter, tungstenite::protocol, WebSoc
 use base64::{engine::general_purpose::STANDARD, Engine};
 use futures::{Future, Sink, Stream};
 use http::{
-    header::{self, HeaderName, SET_COOKIE},
+    header::{self, HeaderName},
     HeaderValue, Method, Response, StatusCode,
 };
 use hyper::upgrade::{OnUpgrade, Upgraded};
@@ -35,30 +35,7 @@ impl WebsocketUpgrade {
         THandler: FnOnce(Request, Box<dyn Websocket + Send>) -> TFut + Send + Sync + 'static,
         TFut: Future<Output = ()> + Send + 'static,
     {
-        WebSocketUpgradeResponse {
-            req,
-            handler,
-            #[cfg(feature = "cookies")]
-            cookies: None,
-        }
-    }
-
-    /// TODO
-    #[cfg(feature = "cookies")]
-    pub fn from_req_with_cookies<THandler, TFut>(
-        req: Request,
-        cookies: cookie::CookieJar,
-        handler: THandler,
-    ) -> WebSocketUpgradeResponse<THandler, TFut>
-    where
-        THandler: FnOnce(Request, Box<dyn Websocket + Send>) -> TFut + Send + Sync + 'static,
-        TFut: Future<Output = ()> + Send + 'static,
-    {
-        WebSocketUpgradeResponse {
-            req,
-            handler,
-            cookies: Some(cookies),
-        }
+        WebSocketUpgradeResponse { req, handler }
     }
 }
 
@@ -70,8 +47,6 @@ where
 {
     req: Request,
     handler: THandler,
-    #[cfg(feature = "cookies")]
-    cookies: Option<cookie::CookieJar>,
 }
 
 // By only spawning the tokio task here, we ensure we aren't spawning tasks if the user forgets to return the websocket upgrade response from the handler.
@@ -81,18 +56,7 @@ where
     TFut: Future<Output = ()> + Send + 'static,
 {
     fn into_response(mut self) -> Result<Response<Vec<u8>>, Error> {
-        let mut resp = Response::builder();
-
-        #[cfg(feature = "cookies")]
-        if let Some(jar) = self.cookies {
-            if let Some(headers) = resp.headers_mut() {
-                for cookie in jar.delta() {
-                    if let Ok(header_value) = cookie.encoded().to_string().parse() {
-                        headers.append(SET_COOKIE, header_value);
-                    }
-                }
-            }
-        }
+        let resp = Response::builder();
 
         if self.req.method() != Method::GET {
             return Ok(resp.status(StatusCode::METHOD_NOT_ALLOWED).body(vec![])?);

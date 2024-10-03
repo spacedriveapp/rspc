@@ -19,8 +19,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 [features]
 default = []
 tauri = ["dep:tauri"]
-tracing = ["dep:tracing"]
-httpz = ["dep:httpz", "httpz/cookies"]
+httpz = ["dep:httpz"]
 # openapi = ["dep:openapiv3"]
 anyhow = ["dep:anyhow"]
 
@@ -28,7 +27,7 @@ alpha = []    # APIs that are not yet stable
 unstable = [] # APIs where one line of code can blow up your whole app
 
 # Webservers
-axum = ["dep:httpz", "httpz/axum", "httpz/tokio-ws", "httpz/axum"]
+axum = ["dep:httpz", "httpz/axum", "httpz/tokio-ws"]
 
 # Specta # TODO: Remove all of these with v1
 uuid = ["specta/uuid"]
@@ -46,32 +45,34 @@ bytesize = ["specta/bytesize"]
 glam = ["specta/glam"]
 
 [dependencies]
+httpz = { path = "./httpz", optional = true }
+
 specta = { version = "=2.0.0-rc.20", features = ["derive", "serde", "serde_json"] }
 specta-serde = { version = "=0.0.7" }
 specta-typescript = { version = "=0.0.7", features = ["function"] }
-specta-datatype-from = { git = "https://github.com/spacedriveapp/specta", rev = "dcdc9e5" }
-httpz = { path = "./httpz", optional = true }
-serde = { version = "1.0.205", features = ["derive"] }
-serde_json = "1.0.122"
-thiserror = "1.0.40"
+specta-datatype-from = { git = "https://github.com/specta-rs/specta", rev = "8509af0162" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
 futures = "0.3.28"
-tokio = { version = "1.27.0", features = ["sync", "rt", "macros"] }
-tauri = { version = "=2.0.0-rc.16", optional = true }
-tracing = { version = "0.1.37", optional = true }
-anyhow = { version = "1", optional = true }
+tokio = { version = "1.40", features = ["sync", "rt", "macros"] }
+tracing = { version = "0.1.37" }
 futures-locks = { version = "0.7.1", features = ["tokio"] }
 futures-channel = "0.3.28"
 nougat = "0.2.4"
-pin-project = "1.0.12"
+pin-project = "1.0"
+
+tauri = { version = "2.0", optional = true }
+anyhow = { version = "1.0", optional = true }
 
 [dev-dependencies]
 # Tests
-async-stream = "0.3.4"
+async-stream = "0.3.6"
 
 # Benchmark
-criterion = { version = "0.4", features = ["async_tokio", "html_reports"] }
-pprof = { version = "0.11.1", features = ["flamegraph", "criterion", "protobuf-codec", "frame-pointer"] }
-tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
+criterion = { version = "0.5.1", features = ["async_tokio", "html_reports"] }
+pprof = { version = "0.13.0", features = ["flamegraph", "criterion", "protobuf-codec", "frame-pointer"] }
+tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
 
 [workspace]
 members = ["./httpz"]

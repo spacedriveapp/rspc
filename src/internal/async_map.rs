@@ -131,7 +131,7 @@ mod futures_locks_impl {
             let this = self.get_mut();
             match Pin::new(&mut this.f).poll(cx) {
                 Poll::Ready(mut map) => {
-                    let (k, v) = this.kv.take().expect("future was polled after completion");
+                    let (k, v) = this.kv.take().expect("Future polled after completion");
                     Poll::Ready(map.insert(k, v))
                 }
                 Poll::Pending => Poll::Pending,

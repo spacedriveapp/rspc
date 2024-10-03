@@ -1,6 +1,7 @@
 use std::{
     borrow::Cow,
     marker::PhantomData,
+    panic::Location,
     pin::Pin,
     sync::Arc,
     task::{Context, Poll},
@@ -75,7 +76,7 @@ where
     {
         AlphaProcedure::new_from_resolver(
             RequestLayerMarker::new(RequestKind::Query),
-            self.1.take().unwrap(),
+            self.1.take().expect("Cannot configure procedure twice"),
             builder,
         )
     }
@@ -91,7 +92,7 @@ where
     {
         AlphaProcedure::new_from_resolver(
             RequestLayerMarker::new(RequestKind::Mutation),
-            self.1.take().unwrap(),
+            self.1.take().expect("Cannot configure procedure twice"),
             builder,
         )
     }
@@ -105,7 +106,11 @@ where
             + Fn(TMiddleware::LayerCtx, R::Arg) -> R::Result,
         R::Result: AlphaRequestLayer<R::RequestMarker, Type = StreamMarker>,
     {
-        AlphaProcedure::new_from_resolver(StreamLayerMarker::new(), self.1.take().unwrap(), builder)
+        AlphaProcedure::new_from_resolver(
+            StreamLayerMarker::new(),
+            self.1.take().expect("Cannot configure procedure twice"),
+            builder,
+        )
     }
 }
 
@@ -119,7 +124,7 @@ where
     ) -> AlphaProcedure<MissingResolver<Mw::NewCtx>, (), AlphaMiddlewareLayerBuilder<TMiddleware, Mw>>
     {
         AlphaProcedure::new_from_middleware(AlphaMiddlewareLayerBuilder {
-            middleware: self.1.expect("Uh oh, stinky"),
+            middleware: self.1.expect("Cannot configure procedure twice"),
             mw,
         })
     }
@@ -131,7 +136,7 @@ where
     ) -> AlphaProcedure<MissingResolver<Mw::NewCtx>, (), AlphaMiddlewareLayerBuilder<TMiddleware, Mw>>
     {
         AlphaProcedure::new_from_middleware(AlphaMiddlewareLayerBuilder {
-            middleware: self.1.expect("Uh oh, stinky"),
+            middleware: self.1.expect("Cannot configure procedure twice"),
             mw,
         })
     }
@@ -145,8 +150,17 @@ where
     R::Result: AlphaRequestLayer<R::RequestMarker, Type = FutureMarker>,
     TMiddleware: AlphaMiddlewareBuilderLike,
 {
+    #[track_caller]
     fn build(&mut self, key: Cow<'static, str>, ctx: &mut IntoProcedureCtx<'_, TMiddleware::Ctx>) {
-        let resolver = Arc::new(self.0.take().expect("Called '.build()' multiple times!")); // TODO: Removing `Arc` by moving ownership to `AlphaResolverLayer`
+        let (resolver, middleware) = self
+            .0
+            .take()
+            .map(
+                // TODO: Removing `Arc` by moving ownership to `AlphaResolverLayer`
+                Arc::new,
+            )
+            .zip(self.1.take())
+            .expect("Cannot call '.build()' multiple times!");
 
         let m = match self.2.kind() {
             RequestKind::Query => &mut ctx.queries,
@@ -155,7 +169,7 @@ where
 
         m.append_alpha(
             key.to_string(),
-            self.1.take().unwrap().build(AlphaResolverLayer {
+            middleware.build(AlphaResolverLayer {
                 func: move |ctx, input, _| {
                     Ok(resolver
                         .exec(
@@ -167,7 +181,8 @@ where
                 },
                 phantom: PhantomData,
             }),
-            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap(), // TODO: Error handling using `#[track_caller]`
+            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for procedure",
+                Location::caller())),
         );
     }
 }
@@ -180,12 +195,21 @@ where
     R::Result: AlphaRequestLayer<R::RequestMarker, Type = StreamMarker>,
     TMiddleware: AlphaMiddlewareBuilderLike,
 {
+    #[track_caller]
     fn build(&mut self, key: Cow<'static, str>, ctx: &mut IntoProcedureCtx<'_, TMiddleware::Ctx>) {
-        let resolver = Arc::new(self.0.take().expect("Called '.build()' multiple times!")); // TODO: Removing `Arc`?
+        let (resolver, middleware) = self
+            .0
+            .take()
+            .map(
+                // TODO: Removing `Arc`?
+                Arc::new,
+            )
+            .zip(self.1.take())
+            .expect("Cannot call '.build()' multiple times!");
 
         ctx.subscriptions.append_alpha(
             key.to_string(),
-            self.1.take().unwrap().build(AlphaResolverLayer {
+            middleware.build(AlphaResolverLayer {
                 func: move |ctx, input, _| {
                     Ok(resolver
                         .exec(
@@ -197,7 +221,8 @@ where
                 },
                 phantom: PhantomData,
             }),
-            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap(), // TODO: Error handling using `#[track_caller]`
+            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for procedure",
+                Location::caller())),
         );
     }
 }
@@ -222,7 +247,7 @@ where
     {
         AlphaProcedure::new_from_resolver(
             RequestLayerMarker::new(RequestKind::Query),
-            self.1.take().unwrap(),
+            self.1.take().expect("Cannot configure procedure twice"),
             builder,
         )
     }
@@ -238,7 +263,7 @@ where
     {
         AlphaProcedure::new_from_resolver(
             RequestLayerMarker::new(RequestKind::Query),
-            self.1.take().unwrap(),
+            self.1.take().expect("Cannot configure procedure twice"),
             builder,
         )
     }
@@ -252,7 +277,11 @@ where
             + Fn(TMiddleware::LayerCtx, R::Arg) -> R::Result,
         R::Result: AlphaRequestLayer<R::RequestMarker, Type = StreamMarker>,
     {
-        AlphaProcedure::new_from_resolver(StreamLayerMarker::new(), self.1.take().unwrap(), builder)
+        AlphaProcedure::new_from_resolver(
+            StreamLayerMarker::new(),
+            self.1.take().expect("Cannot configure procedure twice"),
+            builder,
+        )
     }
 }
 
@@ -422,23 +451,30 @@ impl<
         }
 
         match this.2.as_mut().project() {
-            PinnedOptionProj::Some(fut) => {
-                match fut.poll_next(cx) {
-                    Poll::Ready(result) => {
-                        match this.3.take() {
-                            Some(resp) => {
-                                // TODO: Deal with this -> The `resp` handler should probs take in the whole `Result`?
-                                let result = result.unwrap().unwrap();
-
-                                let fut = resp.call(result);
-                                this.4.set(PinnedOption::Some(fut));
+            PinnedOptionProj::Some(fut) => match fut.poll_next(cx) {
+                Poll::Ready(result) => match this.3.take() {
+                    Some(resp) => {
+                        let result = match result
+                            .ok_or_else(|| ExecError::Internal("Empty result".to_string()))
+                            .and_then(|result| result)
+                        {
+                            Ok(result) => result,
+                            Err(err) => {
+                                tracing::error!(
+                                    "Failed to get result from subscription: {:?}",
+                                    err
+                                );
+                                Value::Null
                             }
-                            None => return Poll::Ready(result),
-                        }
+                        };
+
+                        let fut = resp.call(result);
+                        this.4.set(PinnedOption::Some(fut));
                     }
-                    Poll::Pending => return Poll::Pending,
-                }
-            }
+                    None => return Poll::Ready(result),
+                },
+                Poll::Pending => return Poll::Pending,
+            },
             PinnedOptionProj::None => {}
         }
 

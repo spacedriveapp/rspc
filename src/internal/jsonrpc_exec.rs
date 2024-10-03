@@ -120,14 +120,12 @@ impl<'a> Future for OwnedMpscSenderSendFut<'a> {
                 this.0
                     .try_send(this.1.take().expect("Future polled after completion"))
                     .map_err(|_err| {
-                        #[cfg(feature = "tracing")]
                         tracing::error!("Failed to send response: {}", _err);
                     })
                     .ok();
                 Poll::Ready(())
             }
             Poll::Ready(Err(_err)) => {
-                #[cfg(feature = "tracing")]
                 tracing::error!("Failed to reserve capacity to send response: {}", _err);
                 Poll::Ready(())
             }
@@ -183,8 +181,11 @@ where
                         {
                             Ok(s) => s,
                             Err(err) => {
-                                #[cfg(feature = "tracing")]
-                                tracing::error!("Error executing operation: {:?}", err);
+                                tracing::error!(
+                                    "Error executing query operation {:?}: {:?}",
+                                    req.id,
+                                    err
+                                );
 
                                 sender
                                     .send(jsonrpc::Response {
@@ -208,33 +209,55 @@ where
                         //     }
                         // }
 
-                        match stream.next().await.unwrap() {
-                            Ok(v) => {
-                                sender
-                                    .send(jsonrpc::Response {
-                                        jsonrpc: "2.0",
-                                        id: req.id,
-                                        result: ResponseInner::Response(v),
-                                    })
-                                    .await;
-                            }
-                            Err(err) => {
-                                #[cfg(feature = "tracing")]
-                                tracing::error!("Error executing operation: {:?}", err);
+                        if let Some(data) = stream.next().await {
+                            match data {
+                                Ok(value) => {
+                                    sender
+                                        .send(jsonrpc::Response {
+                                            jsonrpc: "2.0",
+                                            id: req.id.clone(),
+                                            result: ResponseInner::Response(value),
+                                        })
+                                        .await;
+                                }
+                                Err(error) => {
+                                    tracing::error!(
+                                        "Error executing query operation {:?}: {:?}",
+                                        req.id,
+                                        error
+                                    );
 
-                                sender
-                                    .send(jsonrpc::Response {
-                                        jsonrpc: "2.0",
-                                        id: req.id,
-                                        result: ResponseInner::Error(err.into()),
-                                    })
-                                    .await;
+                                    sender
+                                        .send(jsonrpc::Response {
+                                            jsonrpc: "2.0",
+                                            id: req.id.clone(),
+                                            result: ResponseInner::Error(error.into()),
+                                        })
+                                        .await;
+                                }
                             }
+                        } else {
+                            tracing::warn!(
+                                "Stream ended unexpectedly for query request: {:?}",
+                                req.id
+                            );
+
+                            sender
+                                .send(jsonrpc::Response {
+                                    jsonrpc: "2.0",
+                                    id: req.id.clone(),
+                                    result: ResponseInner::Error(
+                                        ExecError::Internal(
+                                            "Stream ended unexpectedly".to_string(),
+                                        )
+                                        .into(),
+                                    ),
+                                })
+                                .await;
                         }
                     }
                     Err(err) => {
-                        #[cfg(feature = "tracing")]
-                        tracing::error!("Error executing operation: {:?}", err);
+                        tracing::error!("Error executing query operation {:?}: {:?}", req.id, err);
 
                         sender
                             .send(jsonrpc::Response {
@@ -268,8 +291,11 @@ where
                         {
                             Ok(s) => s,
                             Err(err) => {
-                                #[cfg(feature = "tracing")]
-                                tracing::error!("Error executing operation: {:?}", err);
+                                tracing::error!(
+                                    "Error executing mutation operation {:?}: {:?}",
+                                    req.id,
+                                    err
+                                );
 
                                 sender
                                     .send(jsonrpc::Response {
@@ -293,33 +319,59 @@ where
                         //     }
                         // }
 
-                        match stream.next().await.unwrap() {
-                            Ok(v) => {
-                                sender
-                                    .send(jsonrpc::Response {
-                                        jsonrpc: "2.0",
-                                        id: req.id,
-                                        result: ResponseInner::Response(v),
-                                    })
-                                    .await;
-                            }
-                            Err(err) => {
-                                #[cfg(feature = "tracing")]
-                                tracing::error!("Error executing operation: {:?}", err);
+                        if let Some(data) = stream.next().await {
+                            match data {
+                                Ok(v) => {
+                                    sender
+                                        .send(jsonrpc::Response {
+                                            jsonrpc: "2.0",
+                                            id: req.id,
+                                            result: ResponseInner::Response(v),
+                                        })
+                                        .await;
+                                }
+                                Err(err) => {
+                                    tracing::error!(
+                                        "Error executing mutation operation {:?}: {:?}",
+                                        req.id,
+                                        err
+                                    );
 
-                                sender
-                                    .send(jsonrpc::Response {
-                                        jsonrpc: "2.0",
-                                        id: req.id,
-                                        result: ResponseInner::Error(err.into()),
-                                    })
-                                    .await;
+                                    sender
+                                        .send(jsonrpc::Response {
+                                            jsonrpc: "2.0",
+                                            id: req.id,
+                                            result: ResponseInner::Error(err.into()),
+                                        })
+                                        .await;
+                                }
                             }
+                        } else {
+                            tracing::warn!(
+                                "Stream ended unexpectedly for mutation operation: {:?}",
+                                req.id
+                            );
+
+                            sender
+                                .send(jsonrpc::Response {
+                                    jsonrpc: "2.0",
+                                    id: req.id.clone(),
+                                    result: ResponseInner::Error(
+                                        ExecError::Internal(
+                                            "Stream ended unexpectedly".to_string(),
+                                        )
+                                        .into(),
+                                    ),
+                                })
+                                .await;
                         }
                     }
                     Err(err) => {
-                        #[cfg(feature = "tracing")]
-                        tracing::error!("Error executing operation: {:?}", err);
+                        tracing::error!(
+                            "Error executing mutation operation {:?}: {:?}",
+                            req.id,
+                            err
+                        );
 
                         sender
                             .send(jsonrpc::Response {
@@ -366,8 +418,11 @@ where
                         .get(&path)
                         .ok_or_else(|| ExecError::OperationNotFound(path.clone()))
                     {
-                        #[cfg(feature = "tracing")]
-                        tracing::error!("Error executing operation: {:?}", err);
+                        tracing::error!(
+                            "Error executing subscription operation {:?}: {:?}",
+                            id,
+                            err
+                        );
 
                         sender
                             .send(jsonrpc::Response {
@@ -401,8 +456,11 @@ where
                         {
                             Ok(s) => s,
                             Err(err) => {
-                                #[cfg(feature = "tracing")]
-                                tracing::error!("Error executing operation: {:?}", err);
+                                tracing::error!(
+                                    "Error executing subscription operation {:?}: {:?}",
+                                    id,
+                                    err
+                                );
 
                                 sender
                                     .send(jsonrpc::Response {
@@ -419,7 +477,6 @@ where
                             tokio::select! {
                                 biased; // Note: Order matters
                                 _ = &mut shutdown_rx => {
-                                    #[cfg(feature = "tracing")]
                                     tracing::debug!("Removing subscription with id '{:?}'", id);
                                     break;
                                 }
@@ -434,8 +491,7 @@ where
                                             .await;
                                         }
                                         Some(Err(_err)) => {
-                                            #[cfg(feature = "tracing")]
-                                            tracing::error!("Subscription error: {:?}", _err);
+                                            tracing::error!("Subscription {:?} error: {:?}", id, _err);
                                         }
                                         None => {
                                             break;

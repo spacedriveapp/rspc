@@ -43,30 +43,6 @@ impl Request {
         &self.1
     }
 
-    /// Get a new [CookieJar] which is derived from the cookies in the request.
-    #[cfg(feature = "cookies")]
-    pub fn cookies(&self) -> cookie::CookieJar {
-        use {
-            cookie::{Cookie, CookieJar},
-            http::header::COOKIE,
-        };
-
-        let mut jar = CookieJar::new();
-        for cookie in self
-            .0
-            .headers
-            .get_all(COOKIE)
-            .into_iter()
-            .filter_map(|value| value.to_str().ok())
-            .flat_map(|value| value.split(';'))
-            .filter_map(|cookie| Cookie::parse_encoded(cookie.to_owned()).ok())
-        {
-            jar.add_original(cookie);
-        }
-
-        jar
-    }
-
     /// query_pairs returns an iterator of the query parameters.
     pub fn query_pairs(&self) -> Option<form_urlencoded::Parse<'_>> {
         self.0

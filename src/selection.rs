@@ -40,7 +40,7 @@ mod tests {
     use specta_typescript::inline;
 
     fn ts_export_ref<T: Type>(_t: &T) -> String {
-        inline::<T>(&Default::default()).unwrap()
+        inline::<T>(&Default::default()).expect("Failed to generate TypeScript inline type")
     }
 
     #[derive(Clone)]

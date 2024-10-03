@@ -39,7 +39,6 @@ impl<'a> Sender<'a> for TauriSender {
         self.0
             .emit("plugin:rspc:transport:resp", resp)
             .map_err(|err| {
-                #[cfg(feature = "tracing")]
                 tracing::error!("failed to emit JSON-RPC response: {}", err);
             })
             .ok();
@@ -56,7 +55,6 @@ impl OwnedSender for TauriOwnedSender {
         self.0
             .emit("plugin:rspc:transport:resp", resp)
             .map_err(|err| {
-                #[cfg(feature = "tracing")]
                 tracing::error!("failed to emit JSON-RPC response: {}", err);
             })
             .ok();
@@ -94,7 +92,7 @@ where
         window.hash(&mut hasher);
         let window_hash = hasher.finish();
 
-        let mut windows = self.windows.lock().unwrap();
+        let mut windows = self.windows.lock().expect("Failed to lock windows mutex");
         // Shutdown all subscriptions for the previously loaded page is there was one
         if let Some(subscriptions) = windows.get(&window_hash) {
             let mut subscriptions = block_on(subscriptions.lock());
@@ -115,7 +113,6 @@ where
                                 match serde_json::from_str::<serde_json::Value>(&s) {
                                     Ok(v) => v,
                                     Err(err) => {
-                                        #[cfg(feature = "tracing")]
                                         tracing::error!(
                                             "failed to parse JSON-RPC request: {}",
                                             err
@@ -127,7 +124,6 @@ where
                             v => v,
                         },
                         Err(err) => {
-                            #[cfg(feature = "tracing")]
                             tracing::error!("failed to parse JSON-RPC request: {}", err);
                             return;
                         }
@@ -140,7 +136,6 @@ where
                     } {
                         Ok(v) => v,
                         Err(err) => {
-                            #[cfg(feature = "tracing")]
                             tracing::error!("failed to parse JSON-RPC request: {}", err);
                             return;
                         }
@@ -168,7 +163,12 @@ where
         window.hash(&mut hasher);
         let window_hash = hasher.finish();
 
-        if let Some(rspc_window) = self.windows.lock().unwrap().remove(&window_hash) {
+        if let Some(rspc_window) = self
+            .windows
+            .lock()
+            .expect("Failed to lock windows mutex")
+            .remove(&window_hash)
+        {
             spawn(async move {
                 let mut subscriptions = rspc_window.lock().await;
                 for (_, tx) in subscriptions.drain() {

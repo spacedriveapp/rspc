@@ -4,7 +4,7 @@ use specta::TypeMap;
 
 use crate::{
     internal::{BaseMiddleware, ProcedureStore},
-    Config, Router, RouterBuilder, RouterBuilderLike,
+    is_invalid_router_prefix, Config, Router, RouterBuilder, RouterBuilderLike,
 };
 
 use super::{
@@ -24,7 +24,7 @@ where
 impl<TCtx> Default for AlphaRouter<TCtx>
 where
     TCtx: Send + Sync + 'static,
- {
+{
     fn default() -> Self {
         Self::new()
     }
@@ -109,17 +109,13 @@ where
         prefix: &'static str,
         router: impl AlphaRouterBuilderLike<TCtx>,
     ) -> Self {
-        // TODO
-        // let (prefix, prefix_valid) = is_invalid_router_prefix(prefix);
-        // #[allow(clippy::panic)]
-        // if prefix_valid {
-        //     eprintln!(
-        //         "{}: rspc error: attempted to merge a router with the prefix '{}', however this prefix is not allowed. ",
-        //         Location::caller(),
-        //         prefix
-        //     );
-        //     process::exit(1);
-        // }
+        let (prefix, prefix_valid) = is_invalid_router_prefix(prefix);
+        if prefix_valid {
+            panic!(
+            "RSPC error: attempted to merge a router with the prefix '{}', however this prefix is not allowed.",
+            prefix
+            );
+        }
 
         self.procedures.extend(
             router
@@ -202,9 +198,8 @@ where
         };
 
         #[cfg(debug_assertions)]
-        #[allow(clippy::unwrap_used)]
         if let Some(export_path) = &router.config.export_bindings_on_build {
-            router.export_ts(export_path).unwrap();
+            router.export_ts(export_path).expect("Failed to export TypeScript bindings");
         }
 
         router

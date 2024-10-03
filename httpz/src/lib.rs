@@ -22,7 +22,5 @@ pub use response::*;
 pub use server::*;
 pub use servers::*;
 
-#[cfg(feature = "cookies")]
-pub use cookie;
 pub use form_urlencoded;
 pub use http;

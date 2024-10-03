@@ -1,4 +1,4 @@
-use std::{borrow::Cow, marker::PhantomData, panic::Location, process};
+use std::{borrow::Cow, marker::PhantomData, panic::Location};
 
 use serde::de::DeserializeOwned;
 use specta::{Type, TypeMap};
@@ -7,7 +7,7 @@ use specta_typescript as ts;
 use crate::{
     internal::{
         BaseMiddleware, BuiltProcedureBuilder, EitherLayer, MiddlewareBuilderLike,
-        MiddlewareLayerBuilder, MiddlewareMerger, ProcedureDataType, ProcedureStore, ResolverLayer,
+        MiddlewareLayerBuilder, ProcedureDataType, ProcedureStore, ResolverLayer,
         UnbuiltProcedureBuilder,
     },
     Config, ExecError, MiddlewareBuilder, MiddlewareLike, RequestLayer, Router, StreamRequestLayer,
@@ -32,10 +32,6 @@ pub(crate) fn is_invalid_router_prefix(s: &str) -> (String, bool) {
     // TODO: Prevent Typescript reserved keywords
 
     let s = if s.ends_with('.') {
-        // TODO: Replace this with a hard error in a future release.
-        println!(
-            "rspc warning: attempted to merge a router using prefix '{s}' which is going to be unsupported in a future release. Please remove the trailing '.' to avoid a hard error in the future."
-        );
         s.to_owned()
     } else {
         format!("{}.", s)
@@ -124,7 +120,6 @@ where
     }
 }
 
-#[allow(clippy::unwrap_used)] // TODO: Remove this
 impl<TCtx, TLayerCtx, TMeta, TMiddleware> RouterBuilder<TCtx, TMeta, TMiddleware>
 where
     TCtx: Send + Sync + 'static,
@@ -220,12 +215,10 @@ where
         TResolver: Fn(TLayerCtx, TArg) -> TResult + Send + Sync + 'static,
     {
         if is_invalid_procedure_name(key) {
-            eprintln!(
-                "{}: rspc error: attempted to attach a query with the key '{}', however this name is not allowed. ",
-                Location::caller(),
-                key
+            panic!(
+            "RSPC error: attempted to attach a query with the key '{}', however this name is not allowed.",
+            key
             );
-            process::exit(1);
         }
 
         let resolver = builder(UnbuiltProcedureBuilder::default()).resolver;
@@ -241,7 +234,8 @@ where
                 },
                 phantom: PhantomData,
             }),
-            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap(),
+            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for query",
+                    Location::caller())),
         );
         self
     }
@@ -260,12 +254,10 @@ where
         TResolver: Fn(TLayerCtx, TArg) -> TResult + Send + Sync + 'static,
     {
         if is_invalid_procedure_name(key) {
-            eprintln!(
-                "{}: rspc error: attempted to attach a mutation with the key '{}', however this name is not allowed. ",
-                Location::caller(),
-                key
+            panic!(
+            "RSPC error: attempted to attach a mutation with the key '{}', however this name is not allowed.",
+            key
             );
-            process::exit(1);
         }
 
         let resolver = builder(UnbuiltProcedureBuilder::default()).resolver;
@@ -281,7 +273,8 @@ where
                 },
                 phantom: PhantomData,
             }),
-            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap(),
+            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for mutation",
+                    Location::caller())),
         );
         self
     }
@@ -298,12 +291,10 @@ where
         TResult: StreamRequestLayer<TResultMarker>,
     {
         if is_invalid_procedure_name(key) {
-            eprintln!(
-                "{}: rspc error: attempted to attach a subscription with the key '{}', however this name is not allowed. ",
-                Location::caller(),
-                key
+            panic!(
+            "RSPC error: attempted to attach a subscription with the key '{}', however this name is not allowed.",
+            key
             );
-            process::exit(1);
         }
 
         let resolver = builder(UnbuiltProcedureBuilder::default()).resolver;
@@ -319,7 +310,8 @@ where
                 },
                 phantom: PhantomData,
             }),
-            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap(),
+            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for subscription",
+                    Location::caller())),
         );
         self
     }
@@ -337,16 +329,14 @@ where
     {
         let router = router.expose();
 
-        // let (prefix, prefix_valid) = is_invalid_router_prefix(prefix);
-        // #[allow(clippy::panic)]
-        // if prefix_valid {
-        //     eprintln!(
-        //         "{}: rspc error: attempted to merge a router with the prefix '{}', however this prefix is not allowed. ",
-        //         Location::caller(),
-        //         prefix
-        //     );
-        //     process::exit(1);
-        // }
+        let (prefix, prefix_valid) = is_invalid_router_prefix(prefix);
+        #[allow(clippy::panic)]
+        if prefix_valid {
+            panic!(
+            "RSPC error: attempted to merge a router with the prefix '{}', however this prefix is not allowed.",
+            prefix
+            );
+        }
 
         // TODO: The `data` field has gotta flow from the root router to the leaf routers so that we don't have to merge user defined types.
 
@@ -403,110 +393,6 @@ where
         self
     }
 
-    /// `legacy_merge` maintains the `merge` functionality prior to release 0.1.3
-    /// It will flow the `TMiddleware` and `TCtx` out of the child router to the parent router.
-    /// This was a confusing behavior and is generally not useful so it has been deprecated.
-    ///
-    /// This function will be remove in a future release. If you are using it open a GitHub issue to discuss your use case and longer term solutions for it.
-    #[track_caller]
-    pub fn legacy_merge<TNewLayerCtx, TIncomingMiddleware>(
-        self,
-        prefix: &'static str,
-        router: impl RouterBuilderLike<TLayerCtx, Meta = TMeta, Middleware = TIncomingMiddleware>,
-    ) -> RouterBuilder<
-        TCtx,
-        TMeta,
-        MiddlewareMerger<TCtx, TLayerCtx, TNewLayerCtx, TMiddleware, TIncomingMiddleware>,
-    >
-    where
-        TNewLayerCtx: 'static,
-        TIncomingMiddleware:
-            MiddlewareBuilderLike<TLayerCtx, LayerContext = TNewLayerCtx> + Send + 'static,
-    {
-        let router = router.expose();
-
-        let (prefix, prefix_valid) = is_invalid_router_prefix(prefix);
-        #[allow(clippy::panic)]
-        if prefix_valid {
-            eprintln!(
-                "{}: rspc error: attempted to merge a router with the prefix '{}', however this prefix is not allowed. ",
-                Location::caller(),
-                prefix
-            );
-            process::exit(1);
-        }
-
-        let Self {
-            config,
-            middleware,
-            mut queries,
-            mut mutations,
-            mut subscriptions,
-            mut typ_store,
-            ..
-        } = self;
-
-        for (key, query) in router.queries.store {
-            match query.exec {
-                EitherLayer::Legacy(exec) => {
-                    queries.append(
-                        format!("{}{}", prefix, key),
-                        middleware.build(exec),
-                        query.ty,
-                    );
-                }
-                #[cfg(feature = "alpha")]
-                EitherLayer::Alpha(_) => todo!(),
-            }
-        }
-
-        for (key, mutation) in router.mutations.store {
-            match mutation.exec {
-                EitherLayer::Legacy(exec) => {
-                    mutations.append(
-                        format!("{}{}", prefix, key),
-                        middleware.build(exec),
-                        mutation.ty,
-                    );
-                }
-                #[cfg(feature = "alpha")]
-                EitherLayer::Alpha(_) => todo!(),
-            }
-        }
-
-        for (key, subscription) in router.subscriptions.store {
-            match subscription.exec {
-                EitherLayer::Legacy(exec) => {
-                    subscriptions.append(
-                        format!("{}{}", prefix, key),
-                        middleware.build(exec),
-                        subscription.ty,
-                    );
-                }
-                #[cfg(feature = "alpha")]
-                EitherLayer::Alpha(_) => todo!(),
-            }
-        }
-
-        for (name, typ) in router.typ_store.iter() {
-            typ_store.insert(name, typ.clone());
-        }
-
-        RouterBuilder {
-            config,
-            middleware: MiddlewareMerger {
-                middleware,
-                middleware2: router.middleware,
-                phantom: PhantomData,
-            },
-            queries,
-            mutations,
-            subscriptions,
-            typ_store,
-            phantom: PhantomData,
-        }
-    }
-
     pub fn build(self) -> Router<TCtx, TMeta> {
         let Self {
             config,
@@ -528,9 +414,10 @@ where
         };
 
         #[cfg(debug_assertions)]
-        #[allow(clippy::unwrap_used)]
         if let Some(export_path) = export_path {
-            router.export_ts(export_path).unwrap();
+            router
+                .export_ts(export_path)
+                .expect("Failed to export TypeScript bindings");
         }
 
         router
