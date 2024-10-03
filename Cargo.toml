@@ -1,15 +1,15 @@
 [package]
-name = "rspc"
-description = "A blazing fast and easy to use TRPC server for Rust."
-version = "0.1.4"
-authors = ["Oscar Beaumont <oscar@otbeaumont.me>"]
-edition = "2021"
-license = "MIT"
-include = ["/src", "/LICENCE", "/README.md"]
-repository = "https://github.com/oscartbeaumont/rspc"
+authors       = ["Oscar Beaumont <oscar@otbeaumont.me>"]
+categories    = ["asynchronous", "web-programming"]
+description   = "A blazing fast and easy to use TRPC server for Rust."
 documentation = "https://docs.rs/rspc/latest/rspc"
-keywords = ["async", "specta", "rust-to-ts", "typescript", "typesafe"]
-categories = ["web-programming", "asynchronous"]
+edition       = "2021"
+include       = ["/LICENCE", "/README.md", "/src"]
+keywords      = ["async", "rust-to-ts", "specta", "typesafe", "typescript"]
+license       = "MIT"
+name          = "rspc"
+repository    = "https://github.com/oscartbeaumont/rspc"
+version       = "0.1.4"
 
 # /bin/sh RUSTDOCFLAGS="--cfg docsrs" cargo +nightly doc --all-features
 [package.metadata."docs.rs"]
@@ -18,52 +18,52 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 default = []
-tauri = ["dep:tauri"]
-httpz = ["dep:httpz"]
+httpz   = ["dep:httpz"]
+tauri   = ["dep:tauri"]
 # openapi = ["dep:openapiv3"]
 anyhow = ["dep:anyhow"]
 
-alpha = []    # APIs that are not yet stable
+alpha    = [] # APIs that are not yet stable
 unstable = [] # APIs where one line of code can blow up your whole app
 
 # Webservers
 axum = ["dep:httpz", "httpz/axum", "httpz/tokio-ws"]
 
 # Specta # TODO: Remove all of these with v1
-uuid = ["specta/uuid"]
-chrono = ["specta/chrono"]
-time = ["specta/time"]
-bigdecimal = ["specta/bigdecimal"]
+bigdecimal   = ["specta/bigdecimal"]
+bit-vec      = ["specta/bit-vec"]
+bson         = ["specta/bson"]
+bytesize     = ["specta/bytesize"]
+chrono       = ["specta/chrono"]
+glam         = ["specta/glam"]
+indexmap     = ["specta/indexmap"]
+ipnetwork    = ["specta/ipnetwork"]
+mac_address  = ["specta/mac_address"]
 rust_decimal = ["specta/rust_decimal"]
-indexmap = ["specta/indexmap"]
-ipnetwork = ["specta/ipnetwork"]
-mac_address = ["specta/mac_address"]
-bit-vec = ["specta/bit-vec"]
-bson = ["specta/bson"]
-uhlc = ["specta/uhlc"]
-bytesize = ["specta/bytesize"]
-glam = ["specta/glam"]
+time         = ["specta/time"]
+uhlc         = ["specta/uhlc"]
+uuid         = ["specta/uuid"]
 
 [dependencies]
 httpz = { path = "./httpz", optional = true }
 
-specta = { version = "=2.0.0-rc.20", features = ["derive", "serde", "serde_json"] }
-specta-serde = { version = "=0.0.7" }
-specta-typescript = { version = "=0.0.7", features = ["function"] }
+futures              = "0.3.28"
+futures-channel      = "0.3.28"
+futures-locks        = { version = "0.7.1", features = ["tokio"] }
+nougat               = "0.2.4"
+pin-project          = "1.0"
+serde                = { version = "1.0", features = ["derive"] }
+serde_json           = "1.0"
+specta               = { version = "=2.0.0-rc.20", features = ["derive", "serde", "serde_json"] }
 specta-datatype-from = { git = "https://github.com/specta-rs/specta", rev = "8509af0162" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-thiserror = "1.0"
-futures = "0.3.28"
-tokio = { version = "1.40", features = ["sync", "rt", "macros"] }
-tracing = { version = "0.1.37" }
-futures-locks = { version = "0.7.1", features = ["tokio"] }
-futures-channel = "0.3.28"
-nougat = "0.2.4"
-pin-project = "1.0"
+specta-serde         = { version = "=0.0.7" }
+specta-typescript    = { version = "=0.0.7", features = ["function"] }
+thiserror            = "1.0"
+tokio                = { version = "1.40", features = ["macros", "rt", "sync"] }
+tracing              = { version = "0.1.37" }
 
-tauri = { version = "2.0", optional = true }
 anyhow = { version = "1.0", optional = true }
+tauri  = { version = "2.0", optional = true }
 
 [dev-dependencies]
 # Tests
@@ -71,7 +71,12 @@ async-stream = "0.3.6"
 
 # Benchmark
 criterion = { version = "0.5.1", features = ["async_tokio", "html_reports"] }
-pprof = { version = "0.13.0", features = ["flamegraph", "criterion", "protobuf-codec", "frame-pointer"] }
+pprof = { version = "0.13.0", features = [
+	"criterion",
+	"flamegraph",
+	"frame-pointer",
+	"protobuf-codec"
+] }
 tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
 
 [workspace]
