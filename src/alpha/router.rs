@@ -199,7 +199,9 @@ where
 
         #[cfg(debug_assertions)]
         if let Some(export_path) = &router.config.export_bindings_on_build {
-            router.export_ts(export_path).expect("Failed to export TypeScript bindings");
+            router
+                .export_ts(export_path)
+                .expect("Failed to export TypeScript bindings");
         }
 
         router

@@ -181,8 +181,12 @@ where
                 },
                 phantom: PhantomData,
             }),
-            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for procedure",
-                Location::caller())),
+            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap_or_else(|_| {
+                panic!(
+                    "{}: Failed to generate type definition for procedure",
+                    Location::caller()
+                )
+            }),
         );
     }
 }
@@ -221,8 +225,12 @@ where
                 },
                 phantom: PhantomData,
             }),
-            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for procedure",
-                Location::caller())),
+            R::typedef::<TMiddleware>(key, ctx.ty_store).unwrap_or_else(|_| {
+                panic!(
+                    "{}: Failed to generate type definition for procedure",
+                    Location::caller()
+                )
+            }),
         );
     }
 }

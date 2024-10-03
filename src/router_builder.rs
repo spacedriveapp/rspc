@@ -237,8 +237,13 @@ where
                 },
                 phantom: PhantomData,
             }),
-            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for query",
-                    Location::caller())),
+            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store)
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "{}: Failed to generate type definition for query",
+                        Location::caller()
+                    )
+                }),
         );
         self
     }
@@ -276,8 +281,13 @@ where
                 },
                 phantom: PhantomData,
             }),
-            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for mutation",
-                    Location::caller())),
+            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store)
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "{}: Failed to generate type definition for mutation",
+                        Location::caller()
+                    )
+                }),
         );
         self
     }
@@ -313,8 +323,13 @@ where
                 },
                 phantom: PhantomData,
             }),
-            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store).unwrap_or_else(|_| panic!("{}: Failed to generate type definition for subscription",
-                    Location::caller())),
+            typedef::<TArg, TResult::Result>(Cow::Borrowed(key), &mut self.typ_store)
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "{}: Failed to generate type definition for subscription",
+                        Location::caller()
+                    )
+                }),
         );
         self
     }
