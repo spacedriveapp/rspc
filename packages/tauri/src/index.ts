@@ -2,7 +2,7 @@
 
 import { OperationType, randomId, RSPCError, Transport } from '@oscartbeaumont-sd/rspc-client'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
-import { appWindow } from '@tauri-apps/api/window'
+import { Window } from '@tauri-apps/api/window'
 
 export class TauriTransport implements Transport {
   private requestMap = new Map<string, (data: any) => void>()
@@ -45,7 +45,7 @@ export class TauriTransport implements Transport {
     // @ts-ignore
     this.requestMap.set(id, resolve)
 
-    await appWindow.emit('plugin:rspc:transport', {
+    await Window.getCurrent().emit('plugin:rspc:transport', {
       id,
       method: operation,
       params: {

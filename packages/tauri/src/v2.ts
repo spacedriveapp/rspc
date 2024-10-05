@@ -2,7 +2,7 @@
 
 import { AlphaRSPCError, Link, RspcRequest } from '@oscartbeaumont-sd/rspc-client/src/v2'
 import { listen } from '@tauri-apps/api/event'
-import { appWindow } from '@tauri-apps/api/window'
+import { Window } from '@tauri-apps/api/window'
 
 /**
  * Link for the rspc Tauri plugin
@@ -50,7 +50,7 @@ export function tauriLink(): Link {
             await listener
           }
 
-          await appWindow.emit('plugin:rspc:transport', currentBatch)
+          await Window.getCurrent().emit('plugin:rspc:transport', currentBatch)
         })()
       })
     }
