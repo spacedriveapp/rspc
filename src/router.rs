@@ -4,12 +4,9 @@ use std::{
     io::Write,
     marker::PhantomData,
     path::{Path, PathBuf},
-    pin::Pin,
     sync::Arc,
 };
 
-use futures::{Stream, StreamExt};
-use serde_json::Value;
 use specta::{
     datatype::FunctionResultVariant, internal::detect_duplicate_type_names, DataType, TypeMap,
 };
@@ -17,8 +14,8 @@ use specta_typescript::{datatype, export_named_datatype, BigIntExportBehavior, T
 // use specta_zod::{BigIntExportBehavior, ExportConfig, export_named_datatype, datatype};
 
 use crate::{
-    internal::{Procedure, ProcedureKind, ProcedureStore, RequestContext},
-    Config, ExecError, ExportError,
+    internal::{Procedure, ProcedureStore},
+    Config, ExportError,
 };
 
 /// TODO
@@ -45,59 +42,6 @@ impl<TCtx, TMeta> Router<TCtx, TMeta>
 where
     TCtx: Send + 'static,
 {
-    // TODO: Deprecate these in 0.1.3 and move into internal package and merge with `execute_jsonrpc`?
-    pub async fn exec(
-        &self,
-        ctx: TCtx,
-        kind: ExecKind,
-        key: String,
-        input: Option<Value>,
-    ) -> Result<Value, ExecError> {
-        let (operations, kind) = match kind {
-            ExecKind::Query => (&self.queries.store, ProcedureKind::Query),
-            ExecKind::Mutation => (&self.mutations.store, ProcedureKind::Mutation),
-        };
-
-        let mut stream = operations
-            .get(&key)
-            .ok_or_else(|| ExecError::OperationNotFound(key.clone()))?
-            .exec
-            .call(
-                ctx,
-                input.unwrap_or(Value::Null),
-                RequestContext {
-                    kind,
-                    path: key.clone(),
-                },
-            )
-            .await?;
-
-        stream.next().await.unwrap()
-    }
-
-    // TODO: Deprecate these in 0.1.3 and move into internal package and merge with `execute_jsonrpc`?
-    pub async fn exec_subscription(
-        &self,
-        ctx: TCtx,
-        key: String,
-        input: Option<Value>,
-    ) -> Result<Pin<Box<dyn Stream<Item = Result<Value, ExecError>> + Send + '_>>, ExecError> {
-        self.subscriptions
-            .store
-            .get(&key)
-            .ok_or_else(|| ExecError::OperationNotFound(key.clone()))?
-            .exec
-            .call(
-                ctx,
-                input.unwrap_or(Value::Null),
-                RequestContext {
-                    kind: ProcedureKind::Subscription,
-                    path: key.clone(),
-                },
-            )
-            .await
-    }
-
     pub fn arced(self) -> Arc<Self> {
         Arc::new(self)
     }
@@ -106,27 +50,11 @@ where
         self.typ_store.clone()
     }
 
-    #[cfg(feature = "unstable")]
-    pub fn typ_store_mut(&mut self) -> &mut TypeMap {
-        &mut self.typ_store
-    }
-
     // TODO: Drop this API in v1
     pub fn queries(&self) -> &BTreeMap<String, Procedure<TCtx>> {
         &self.queries.store
     }
 
-    // TODO: Drop this API in v1
-    pub fn mutations(&self) -> &BTreeMap<String, Procedure<TCtx>> {
-        &self.mutations.store
-    }
-
-    // TODO: Drop this API in v1
-    pub fn subscriptions(&self) -> &BTreeMap<String, Procedure<TCtx>> {
-        &self.subscriptions.store
-    }
-
-    #[allow(clippy::unwrap_used)] // TODO
     pub fn export_ts<TPath: AsRef<Path>>(&self, export_path: TPath) -> Result<(), ExportError> {
         let export_path = PathBuf::from(export_path.as_ref());
         if let Some(export_dir) = export_path.parent() {
@@ -196,16 +124,15 @@ fn generate_procedures_ts<'a, Ctx: 'a>(
                     {
                         "never".into()
                     }
-                    #[allow(clippy::unwrap_used)] // TODO
-                    ty => datatype(config, &FunctionResultVariant::Value(ty.clone()), type_store).unwrap(),
+                    ty => datatype(config, &FunctionResultVariant::Value(ty.clone()), type_store)
+                        .expect("Failed to generate TypeScript type for procedure input"),
                 };
-                #[allow(clippy::unwrap_used)] // TODO
                 let result_ts = datatype(
                     config,
                     &FunctionResultVariant::Value(operation.ty.result.clone()),
                     type_store,
                 )
-                .unwrap();
+                .expect("Failed to generate TypeScript type for procedure result");
 
                 // TODO: Specta API
                 format!(

@@ -1,9 +1,0 @@
-{
-  "extends": "@oscartbeaumont-sd/rspc-config/tsconfig.json",
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "jsx": "preserve",
-    "lib": ["ES2017", "DOM"]
-  },
-  "include": ["src"]
-}

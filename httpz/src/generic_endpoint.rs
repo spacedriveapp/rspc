@@ -91,16 +91,10 @@ where
     type EndpointFn = TEndpointFn;
 
     fn register(&mut self) -> (Self::Url, Self::Routes) {
-        (
-            match self.url.take() {
-                Some(url) => url,
-                None => unreachable!(),
-            },
-            match self.methods.take() {
-                Some(methods) => methods,
-                None => unreachable!(),
-            },
-        )
+        self.url
+            .take()
+            .zip(self.methods.take())
+            .expect("Cannot register the same endpoint twice")
     }
 
     fn handler(&self, req: Request) -> <Self::EndpointFn as EndpointFn<'_>>::Fut {

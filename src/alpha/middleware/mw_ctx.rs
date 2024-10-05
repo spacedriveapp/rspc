@@ -28,7 +28,5 @@ impl AlphaMiddlewareContext {
 
 #[deprecated = "Maybe remove this type?"]
 pub struct AlphaMiddlewareContext2<M> {
-    input: Value,
-    req: RequestContext,
     phantom: PhantomData<M>,
 }

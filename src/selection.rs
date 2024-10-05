@@ -6,7 +6,7 @@ macro_rules! selection {
             // Due to macro expansion order `$crate` can't go in the Specta attribute but when hardcoding `rspc` macro hygiene get's angry.
             // This hack is to avoid both issues.
             mod _rspc {
-                pub use $crate::*;
+
             }
 
             #[derive(serde::Serialize, specta::Type)]
@@ -40,7 +40,7 @@ mod tests {
     use specta_typescript::inline;
 
     fn ts_export_ref<T: Type>(_t: &T) -> String {
-        inline::<T>(&Default::default()).unwrap()
+        inline::<T>(&Default::default()).expect("Failed to generate TypeScript inline type")
     }
 
     #[derive(Clone)]

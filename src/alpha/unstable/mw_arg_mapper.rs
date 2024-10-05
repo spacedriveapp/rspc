@@ -8,7 +8,7 @@ use crate::alpha::{AlphaMiddlewareContext, MwV2Result, MwV3};
 /// TODO
 pub trait MwArgMapper: Send + Sync {
     /// TODO
-    type State: Send + Sync + 'static;
+    type State: Send + Sync + 'static + Default;
 
     /// TODO
     ///
@@ -48,12 +48,29 @@ impl<M: MwArgMapper + 'static> MwArgMapperMiddleware<M> {
         // TODO: Make this passthrough to new handler but provide the owned `State` as an arg
         MiddlewareFnWithTypeMapper(
             move |mw: AlphaMiddlewareContext, ctx| {
-                let (out, state) =
-                    M::map::<serde_json::Value>(serde_json::from_value(mw.input).unwrap());
+                let (out, state) = match serde_json::from_value(mw.input) {
+                    Ok(val) => M::map::<serde_json::Value>(val),
+                    Err(e) => {
+                        tracing::error!(
+                            "Failed to deserialize middleware input: {:?}, request: {:?}",
+                            e,
+                            mw.req
+                        );
+                        // TODO: Find a better way to handle error intead of fallback to default
+                        (serde_json::Value::Null, M::State::default())
+                    }
+                };
 
                 handler(
                     AlphaMiddlewareContext {
-                        input: serde_json::to_value(out).unwrap(), // TODO: Error handling
+                        input: serde_json::to_value(out).unwrap_or_else(|e| {
+                            tracing::error!(
+                                "Failed to serialize output value: {:?}, request: {:?}",
+                                e,
+                                mw.req
+                            );
+                            serde_json::Value::Null
+                        }),
                         req: mw.req,
                         _priv: (),
                     },

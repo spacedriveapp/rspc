@@ -26,6 +26,8 @@ pub enum ExecError {
     ErrSubscriptionWithNullId,
     #[error("error creating subscription with duplicate id")]
     ErrSubscriptionDuplicateId,
+    #[error("Internal error: {0}")]
+    Internal(String),
 }
 
 impl From<ExecError> for Error {
@@ -71,6 +73,11 @@ impl From<ExecError> for Error {
             ExecError::ErrSubscriptionDuplicateId => Error {
                 code: ErrorCode::BadRequest,
                 message: "error creating subscription with duplicate id".into(),
+                cause: None,
+            },
+            ExecError::Internal(msg) => Error {
+                code: ErrorCode::InternalServerError,
+                message: msg,
                 cause: None,
             },
         }

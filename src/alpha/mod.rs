@@ -47,7 +47,7 @@ mod tests {
             .router()
             .procedure(
                 "todo",
-                R.with(|mw, ctx| async move { mw.next(ctx) })
+                R.with(|mw: super::AlphaMiddlewareContext, ctx| async move { Ok(mw.next(ctx)) })
                     .query(|ctx, _: ()| {
                         println!("TODO: {:?}", ctx);
                         Ok(())
@@ -60,20 +60,20 @@ mod tests {
                         "[LOG] req='{:?}' ctx='{:?}' input='{:?}'",
                         mw.req, ctx, mw.input
                     );
-                    mw.next(ctx).resp(|result| async move {
+                    Ok(mw.next(ctx).resp(|result| async move {
                         println!("{msg} result='{result:?}'");
                         result
-                    })
+                    }))
                 })
                 .with(|mw, ctx| async move {
                     let msg = format!(
                         "[LOG2] req='{:?}' ctx='{:?}' input='{:?}'",
                         mw.req, ctx, mw.input
                     );
-                    mw.next(ctx).resp(|result| async move {
+                    Ok(mw.next(ctx).resp(|result| async move {
                         println!("{msg} result='{result:?}'");
                         result
-                    })
+                    }))
                 })
                 .query(|ctx, _: ()| {
                     println!("TODO: {:?}", ctx);
@@ -102,17 +102,18 @@ mod tests {
             )
             .compat();
 
-        r.export_ts(PathBuf::from("./demo.bindings.ts")).unwrap();
+        r.export_ts(PathBuf::from("./demo.bindings.ts"))
+            .expect("Failed to export TypeScript bindings");
     }
 
     #[test]
     fn test_context_switching() {
         const R: Rspc = Rspc::new();
 
-        let p = R
-            .with(|mw, ctx| async move { mw.next((ctx, 42)) })
-            .with(|mw, ctx| async move { mw.next((ctx, 42)) })
-            .with(|mw, ctx| async move { mw.next(ctx) })
+        let _ = R
+            .with(|mw, ctx| async move { Ok(mw.next((ctx, 42))) })
+            .with(|mw, ctx| async move { Ok(mw.next((ctx, 42))) })
+            .with(|mw, ctx| async move { Ok(mw.next(ctx)) })
             .query(|ctx, _: ()| {
                 let ((_, _), _) = ctx; // Assert correct type
 
@@ -126,11 +127,11 @@ mod tests {
 
         fn demo() -> impl ProcedureLike<LayerCtx = ((), i32)> {
             R.with(|mw, ctx| async move {
-                mw.next((ctx, 42)) // Context switch
+                Ok(mw.next((ctx, 42))) // Context switch
             })
         }
 
-        let p = demo().query(|ctx, _: ()| {
+        let _ = demo().query(|ctx, _: ()| {
             let (_, _) = ctx; // Assert correct type
             Ok(())
         });
@@ -142,10 +143,10 @@ mod tests {
         where
             TLCtx: Send + Sync + 'static,
         {
-            |mw, ctx| async move { mw.next((ctx, 42)) }
+            |mw, ctx| async move { Ok(mw.next((ctx, 42))) }
         }
 
-        let p = R.with(library()).with(library()).query(|ctx, _: ()| {
+        let _ = R.with(library()).with(library()).query(|ctx, _: ()| {
             let ((_, _), _) = ctx; // Assert correct type
             Ok(())
         });
@@ -174,7 +175,7 @@ mod tests {
                     let _state: i32 = state; // Assert correct type
                     let _ctx: () = (); // Assert correct type
 
-                    mw.next((ctx, 42))
+                    Ok(mw.next((ctx, 42)))
                 },
             ))
             .query(|ctx, _: ()| {
@@ -220,23 +221,22 @@ mod tests {
             .with2(MwArgMapperMiddleware::<DoubleTupleMapper>::new().mount(
                 |mw, ctx, state| async move {
                     let (_, _) = state; // Assert type is correct
-                    mw.next(ctx)
+                    Ok(mw.next(ctx))
                 },
             ))
             .with2(MwArgMapperMiddleware::<TripleTupleMapper>::new().mount(
                 |mw, ctx, state| async move {
                     let (_, _, _) = state; // Assert type is correct
 
-                    mw.next(ctx)
+                    Ok(mw.next(ctx))
                 },
             ))
             .query(|_, _: i32| Ok(()));
 
-        R
-            .router()
+        R.router()
             .procedure("demo", p)
             .compat()
             .export_ts(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("./demo2.bindings.ts"))
-            .unwrap();
+            .expect("Failed to export TypeScript bindings");
     }
 }

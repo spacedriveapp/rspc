@@ -35,8 +35,6 @@ pub use resolver_result::*;
 pub use router::*;
 pub use router_builder::*;
 
-pub use selection::*;
-
 pub mod integrations;
 pub mod internal;
 

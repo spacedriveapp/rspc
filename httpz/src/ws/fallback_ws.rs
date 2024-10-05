@@ -47,7 +47,7 @@ where
     TFut: Future<Output = ()> + Send + 'static,
 {
     fn into_response(self) -> Result<Response<Vec<u8>>, Error> {
-        println!("[Error] Websocket upgrade not supported by current server.");
+        tracing::error!("Websocket upgrade not supported by current server.");
         Ok(Response::builder().status(500).body(Vec::new())?)
     }
 }
