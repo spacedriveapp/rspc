@@ -1,6 +1,6 @@
 // @ts-nocheck No one asked
 
-import { AlphaRSPCError, Link, RspcRequest } from '@oscartbeaumont-sd/rspc-client/v2'
+import { AlphaRSPCError, Link, RspcRequest } from '@oscartbeaumont-sd/rspc-client/src/v2'
 import { listen } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
 
