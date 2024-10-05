@@ -7,7 +7,12 @@
   "license": "MIT",
   "main": "src/index.ts",
   "dependencies": {
-    "@oscartbeaumont-sd/rspc-client": "workspace:*",
     "@tauri-apps/api": "^2.0.1"
+  },
+  "devDependencies": {
+    "@oscartbeaumont-sd/rspc-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "@oscartbeaumont-sd/rspc-client": "^0.1.3"
   }
 }

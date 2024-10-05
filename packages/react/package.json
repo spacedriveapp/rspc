@@ -10,14 +10,15 @@
     "test": "echo 'No tests yet.' >&2 && exit 1"
   },
   "dependencies": {
-    "@oscartbeaumont-sd/rspc-client": "workspace:*",
     "@tanstack/react-query": "^4.36.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.11",
-    "react": "^18.3.1"
+    "react": "^18.3.1",
+    "@oscartbeaumont-sd/rspc-client": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^18.3.1"
+    "react": "^18.3.1",
+    "@oscartbeaumont-sd/rspc-client": "^0.1.3"
   }
 }
