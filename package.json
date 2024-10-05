@@ -7,26 +7,16 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "pnpm -r --parallel --filter=!@oscartbeaumont-sd/rspc-docs --filter=!@oscartbeaumont-sd/rspc-examples-* --filter=!rspc-vscode exec pnpm dev",
-    "build": "pnpm -r --parallel --filter=!@oscartbeaumont-sd/rspc-docs --filter=!@oscartbeaumont-sd/rspc-examples-* --filter=!rspc-vscode exec pnpm build",
-    "postinstall": "pnpm run config build && pnpm build",
+    "format": "prettier --write .",
     "test": "pnpm -r --parallel --filter=!@oscartbeaumont-sd/rspc-docs --filter=!@oscartbeaumont-sd/rspc-config --filter=!@oscartbeaumont-sd/rspc-examples-* --filter=!rspc-vscode exec pnpm test",
     "typecheck": "pnpm -r --filter=!rspc-vscode exec tsc --noEmit",
-    "docs": "pnpm --filter @oscartbeaumont-sd/rspc-docs -- ",
     "client": "pnpm --filter @oscartbeaumont-sd/rspc-client -- ",
-    "config": "pnpm --filter @oscartbeaumont-sd/rspc-config -- ",
-    "examples": "pnpm --filter @oscartbeaumont-sd/rspc-examples-* -- ",
-    "playground": "pnpm --filter @oscartbeaumont-sd/rspc-playground -- ",
     "react": "pnpm --filter @oscartbeaumont-sd/rspc-react -- ",
-    "solid": "pnpm --filter @oscartbeaumont-sd/rspc-solid -- ",
-    "tauri": "pnpm --filter @oscartbeaumont-sd/rspc-tauri -- ",
-    "set-package-versions": "node .github/scripts/setPackageVersions.js"
+    "tauri": "pnpm --filter @oscartbeaumont-sd/rspc-tauri -- "
   },
-  "engines": {
-    "pnpm": ">=7.0.0",
-    "npm": "pnpm",
-    "yarn": "pnpm",
-    "node": ">=16.0.0"
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.1"
   },
-  "packageManager": "pnpm@9.7.0"
+  "packageManager": "pnpm@9.11.0"
 }

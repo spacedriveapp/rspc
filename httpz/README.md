@@ -41,10 +41,11 @@ HttpServer::new({
 ```
 
 Check out the rest of the [examples](/examples)!
+
 ## Features
 
- - Write your HTTP handler once and support [Axum](https://github.com/tokio-rs/axum), [Actix Web](https://actix.rs/), [Poem](https://github.com/poem-web/poem), [Rocket](https://rocket.rs), [Warp](https://github.com/seanmonstar/warp) and more.
- - Support for websockets on compatible webservers.
+- Write your HTTP handler once and support [Axum](https://github.com/tokio-rs/axum), [Actix Web](https://actix.rs/), [Poem](https://github.com/poem-web/poem), [Rocket](https://rocket.rs), [Warp](https://github.com/seanmonstar/warp) and more.
+- Support for websockets on compatible webservers.
 
 ## Projects using httpz
 
@@ -52,6 +53,6 @@ httpz is primarily designed to make life easier for library authors. It allows a
 
 Libraries using httpz:
 
- - [rspc](https://github.com/oscartbeaumont/rspc)
+- [rspc](https://github.com/oscartbeaumont/rspc)
 
 If you are interested in using httpz and have questions jump in [the Discord](https://discord.gg/4V9M5sksw8)!

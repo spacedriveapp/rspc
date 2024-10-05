@@ -3,7 +3,7 @@
  *
  * @internal
  */
-export type AbortFn = () => void;
+export type AbortFn = () => void
 
 /**
  * TODO
@@ -11,13 +11,13 @@ export type AbortFn = () => void;
  * @internal
  */
 export type PromiseAndCancel<TValue> = {
-  promise: Promise<TValue>;
-  abort: AbortFn;
-};
+  promise: Promise<TValue>
+  abort: AbortFn
+}
 
 /**
  * TODO
  *
  * @internal
  */
-export type FakeObservable = { exec: () => PromiseAndCancel<any> };
+export type FakeObservable = { exec: () => PromiseAndCancel<any> }

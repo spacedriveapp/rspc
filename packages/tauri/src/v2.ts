@@ -1,12 +1,8 @@
 // @ts-nocheck No one asked
 
-import {
-  AlphaRSPCError,
-  Link,
-  RspcRequest,
-} from "@oscartbeaumont-sd/rspc-client/v2";
-import { listen } from "@tauri-apps/api/event";
-import { appWindow } from "@tauri-apps/api/window";
+import { AlphaRSPCError, Link, RspcRequest } from '@oscartbeaumont-sd/rspc-client/v2'
+import { listen } from '@tauri-apps/api/event'
+import { appWindow } from '@tauri-apps/api/window'
 
 /**
  * Link for the rspc Tauri plugin
@@ -15,60 +11,59 @@ export function tauriLink(): Link {
   const activeMap = new Map<
     string,
     {
-      resolve: (result: any) => void;
-      reject: (error: Error | AlphaRSPCError) => void;
+      resolve: (result: any) => void
+      reject: (error: Error | AlphaRSPCError) => void
     }
-  >();
+  >()
   // @ts-ignore-error
-  const listener = listen("plugin:rspc:transport:resp", (event) => {
-    const { id, result } = event.payload as any;
+  const listener = listen('plugin:rspc:transport:resp', event => {
+    const { id, result } = event.payload as any
     if (activeMap.has(id)) {
-      if (result.type === "event") {
-        activeMap.get(id)?.resolve(result.data);
-      } else if (result.type === "response") {
-        activeMap.get(id)?.resolve(result.data);
-        activeMap.delete(id);
-      } else if (result.type === "error") {
-        const { message, code } = result.data;
-        activeMap.get(id)?.reject(new AlphaRSPCError(code, message));
-        activeMap.delete(id);
+      if (result.type === 'event') {
+        activeMap.get(id)?.resolve(result.data)
+      } else if (result.type === 'response') {
+        activeMap.get(id)?.resolve(result.data)
+        activeMap.delete(id)
+      } else if (result.type === 'error') {
+        const { message, code } = result.data
+        activeMap.get(id)?.reject(new AlphaRSPCError(code, message))
+        activeMap.delete(id)
       } else {
-        console.error(`rspc: received event of unknown type '${result.type}'`);
+        console.error(`rspc: received event of unknown type '${result.type}'`)
       }
     } else {
-      console.error(`rspc: received event for unknown id '${id}'`);
+      console.error(`rspc: received event for unknown id '${id}'`)
     }
-  });
+  })
 
-  const batch: RspcRequest[] = [];
-  let batchQueued = false;
+  const batch: RspcRequest[] = []
+  let batchQueued = false
   const queueBatch = () => {
     if (!batchQueued) {
-      batchQueued = true;
+      batchQueued = true
       setTimeout(() => {
-        const currentBatch = [...batch];
-        batch.splice(0, batch.length);
-        batchQueued = false;
-
-        (async () => {
+        const currentBatch = [...batch]
+        batch.splice(0, batch.length)
+        batchQueued = false
+        ;(async () => {
           if (!listener) {
-            await listener;
+            await listener
           }
 
-          await appWindow.emit("plugin:rspc:transport", currentBatch);
-        })();
-      });
+          await appWindow.emit('plugin:rspc:transport', currentBatch)
+        })()
+      })
     }
-  };
+  }
 
   return ({ op }) => {
-    let finished = false;
+    let finished = false
     return {
       exec: async (resolve, reject) => {
         activeMap.set(op.id, {
           resolve,
           reject,
-        });
+        })
 
         // @ts-ignore-error
         batch.push({
@@ -78,29 +73,29 @@ export function tauriLink(): Link {
             path: op.path,
             input: op.input,
           },
-        });
-        queueBatch();
+        })
+        queueBatch()
       },
       abort() {
-        if (finished) return;
-        finished = true;
+        if (finished) return
+        finished = true
 
-        const subscribeEventIdx = batch.findIndex((b) => b.id === op.id);
+        const subscribeEventIdx = batch.findIndex(b => b.id === op.id)
         if (subscribeEventIdx === -1) {
-          if (op.type === "subscription") {
+          if (op.type === 'subscription') {
             batch.push({
               id: op.id,
-              method: "subscriptionStop",
+              method: 'subscriptionStop',
               params: null,
-            });
-            queueBatch();
+            })
+            queueBatch()
           }
         } else {
-          batch.splice(subscribeEventIdx, 1);
+          batch.splice(subscribeEventIdx, 1)
         }
 
-        activeMap.delete(op.id);
+        activeMap.delete(op.id)
       },
-    };
-  };
+    }
+  }
 }

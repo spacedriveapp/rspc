@@ -5,49 +5,11 @@
   "keywords": [],
   "author": "Oscar Beaumont",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.js"
-    },
-    "./full": {
-      "types": "./dist/full.d.ts",
-      "import": "./dist/full.mjs",
-      "default": "./dist/full.js"
-    },
-    "./v2": {
-      "types": "./dist/v2.d.ts",
-      "import": "./dist/v2.mjs",
-      "default": "./dist/v2.js"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "full": [
-        "dist/full.d.ts"
-      ],
-      "v2": [
-        "dist/v2.d.ts"
-      ]
-    }
-  },
-  "files": [
-    "dist"
-  ],
+  "main": "src/index.ts",
   "scripts": {
-    "build": "rollup --config rollup.config.ts --configPlugin swc3",
-    "dev": "pnpm build --watch",
-    "test": "vitest ./index.test.ts"
+    "test": "echo 'No tests yet.' >&2 && exit 1"
   },
   "devDependencies": {
-    "@oscartbeaumont-sd/rspc-config": "workspace:*",
-    "rollup": "^3.21.2",
-    "typescript": "^5.0.4",
-    "vitest": "^0.30.1",
-    "ws": "^8.13.0"
+    "ws": "^8.18.0"
   }
 }

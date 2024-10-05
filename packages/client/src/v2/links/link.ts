@@ -1,4 +1,4 @@
-import { AlphaRSPCError } from "../error";
+import { AlphaRSPCError } from '../error'
 
 /**
  * A map of data that can be used by links to store metadata about the current operation.
@@ -6,7 +6,7 @@ import { AlphaRSPCError } from "../error";
  *
  * @internal
  */
-export type OperationContext = Record<string, unknown>;
+export type OperationContext = Record<string, unknown>
 
 /**
  * TODO
@@ -15,12 +15,12 @@ export type OperationContext = Record<string, unknown>;
  */
 export interface Operation {
   // TODO: Optional on being a subscription?
-  id: string; // TODO: Move back to being an int?
+  id: string // TODO: Move back to being an int?
 
-  type: "query" | "mutation" | "subscription" | "subscriptionStop"; // TODO: Derive this from Rust bindings
-  input: unknown;
-  path: string;
-  context: OperationContext;
+  type: 'query' | 'mutation' | 'subscription' | 'subscriptionStop' // TODO: Derive this from Rust bindings
+  input: unknown
+  path: string
+  context: OperationContext
 }
 
 /**
@@ -29,12 +29,9 @@ export interface Operation {
  * @internal
  */
 export type LinkResult = {
-  exec: (
-    resolve: (result: any) => void,
-    reject: (error: Error | AlphaRSPCError) => void
-  ) => void;
-  abort: () => void;
-};
+  exec: (resolve: (result: any) => void, reject: (error: Error | AlphaRSPCError) => void) => void
+  abort: () => void
+}
 
 /**
  * The argument to a link. Contains information about the current operation and a function to call the next link.
@@ -42,8 +39,8 @@ export type LinkResult = {
  * @internal
  */
 export interface LinkOperation {
-  op: Operation;
-  next(op: { op: Operation }): LinkResult;
+  op: Operation
+  next(op: { op: Operation }): LinkResult
 }
 
 /**
@@ -51,4 +48,4 @@ export interface LinkOperation {
  *
  * @internal
  */
-export type Link = (p: LinkOperation) => LinkResult;
+export type Link = (p: LinkOperation) => LinkResult

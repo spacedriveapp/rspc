@@ -5,50 +5,19 @@
   "keywords": [],
   "author": "Oscar Beaumont",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.js"
-    },
-    "./v2": {
-      "types": "./dist/v2.d.ts",
-      "import": "./dist/v2.mjs",
-      "default": "./dist/v2.js"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "v2": [
-        "dist/v2.d.ts"
-      ]
-    }
-  },
-  "files": [
-    "dist"
-  ],
+  "main": "src/index.ts",
   "scripts": {
-    "build": "rollup --config rollup.config.ts --configPlugin swc3",
-    "dev": "pnpm build --watch",
-    "test": "vitest"
+    "test": "echo 'No tests yet.' >&2 && exit 1"
+  },
+  "dependencies": {
+    "@oscartbeaumont-sd/rspc-client": "workspace:*",
+    "@tanstack/react-query": "^4.36.1"
   },
   "devDependencies": {
-    "@oscartbeaumont-sd/rspc-client": "workspace:*",
-    "@oscartbeaumont-sd/rspc-config": "workspace:*",
-    "@tanstack/react-query": "^4.29.5",
-    "@types/react": "^18.2.0",
-    "react": "^18.2.0",
-    "rollup": "^3.21.2",
-    "tslib": "^2.5.0",
-    "typescript": "^5.0.4",
-    "vitest": "^0.30.1"
+    "@types/react": "^18.3.11",
+    "react": "^18.3.1"
   },
   "peerDependencies": {
-    "@oscartbeaumont-sd/rspc-client": "workspace:*",
-    "@tanstack/react-query": "^4.26.0",
-    "react": "^18.2.0"
+    "react": "^18.3.1"
   }
 }

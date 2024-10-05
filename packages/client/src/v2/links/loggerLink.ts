@@ -1,4 +1,4 @@
-import { Link } from "./link";
+import type { Link } from './link'
 
 // TODO: Pretty log output like tRPC's logger link
 
@@ -12,27 +12,27 @@ export function loggerLink(): Link {
   return ({ op, next }) => {
     const result = next({
       op,
-    });
+    })
 
-    console.log("REQUEST", op, next);
+    console.log('REQUEST', op, next)
 
     return {
       exec: (resolve, reject) => {
         result.exec(
-          (data) => {
-            console.log("RESPONSE", op, data);
-            resolve(data);
+          data => {
+            console.log('RESPONSE', op, data)
+            resolve(data)
           },
-          (err) => {
-            console.error("RESPONSE ERROR", op, err);
-            reject(err);
+          err => {
+            console.error('RESPONSE ERROR', op, err)
+            reject(err)
           }
-        );
+        )
       },
       abort: () => {
-        console.log("ABORT OP", op);
-        result.abort();
+        console.log('ABORT OP', op)
+        result.abort()
       },
-    };
-  };
+    }
+  }
 }

@@ -1,6 +1,2 @@
 packages:
- - docs/
- - packages/*
- - examples/astro
- - examples/nextjs
- - examples/vercel
+  - packages/*
