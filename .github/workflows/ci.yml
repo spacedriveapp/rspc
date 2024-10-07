@@ -3,12 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
   workflow_dispatch:
 
 jobs:
@@ -21,21 +17,43 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Filter files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            changes:
+              - './packages/**'
+              - '.github/workflows/ci.yml'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'package.json'
+              - 'prettier.config.mjs'
+              - 'tsconfig.json'
+              - '.prettierignore'
+              - '.editorconfig'
+              - '.gitignore'
+
       - name: Install NodeJS
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install pnpm
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Install pnpm dependencies
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         run: pnpm i --frozen-lockfile
 
       - name: Check format with Prettier
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         run: pnpm prettier --check .
 
       - name: Typecheck with TypeScript
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         run: pnpm typecheck
 
   rust:
@@ -47,25 +65,44 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Filter files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            changes:
+              - './src/**'
+              - './httpz/**'
+              - '.github/workflows/ci.yml'
+              - 'Cargo.toml'
+              - '.rustfmt.toml'
+              - '.editorconfig'
+              - '.gitignore'
+
       - name: Install system dependencies
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         run: |-
           sudo apt-get -yqq update
           sudo apt-get install -yqq libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Install Rust toolchain
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         run: rustup toolchain install stable --profile minimal
 
-      - name: Install Rust dependencies
-        run: cargo install cargo-hack
-
       - name: Check Rust format
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         run: cargo fmt -- --check
 
+      - name: Install Rust dependencies
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
+        run: cargo +stable install cargo-hack --locked
+
       - name: Check Rust crate
-        run: cargo hack check --feature-powerset --no-dev-deps \
-          --group-features bigdecimal,bit-vec,bson,bytesize,chrono,glam,indexmap,ipnetwork,mac_address,rust_decimal,time,uhlc,uuid
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
+        run: cargo hack check --feature-powerset --no-dev-deps --group-features bigdecimal,bit-vec,bson,bytesize,chrono,glam,indexmap,ipnetwork,mac_address,rust_decimal,time,uhlc,uuid
 
       - name: Run Clippy
+        if: steps.filter.outcome != 'success' || steps.filter.outputs.changes == 'true'
         uses: giraffate/clippy-action@v1
         with:
           reporter: github-pr-review
