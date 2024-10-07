@@ -1,6 +1,6 @@
 {
-  "name": "@oscartbeaumont-sd/rspc-workspace",
-  "version": "0.0.0",
+  "name": "@spacedrive/rspc-workspace",
+  "version": "1.0.0",
   "description": "A blazingly fast and easy to use TRPC-like server for Rust.",
   "keywords": [],
   "author": "Oscar Beaumont",
@@ -8,15 +8,15 @@
   "private": true,
   "scripts": {
     "format": "prettier --write .",
-    "test": "pnpm -r --parallel --filter=!@oscartbeaumont-sd/rspc-docs --filter=!@oscartbeaumont-sd/rspc-config --filter=!@oscartbeaumont-sd/rspc-examples-* --filter=!rspc-vscode exec pnpm test",
-    "typecheck": "pnpm -r --filter=!rspc-vscode exec tsc --noEmit",
-    "client": "pnpm --filter @oscartbeaumont-sd/rspc-client -- ",
-    "react": "pnpm --filter @oscartbeaumont-sd/rspc-react -- ",
-    "tauri": "pnpm --filter @oscartbeaumont-sd/rspc-tauri -- "
+    "test": "echo 'No tests yet.' >&2 && exit 1",
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "client": "pnpm --filter @spacedrive/rspc-client -- ",
+    "react": "pnpm --filter @spacedrive/rspc-react -- ",
+    "tauri": "pnpm --filter @spacedrive/rspc-tauri -- "
   },
   "devDependencies": {
     "typescript": "^5.6.2",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1"
   },
-  "packageManager": "pnpm@9.11.0"
+  "packageManager": "pnpm@9.12.0"
 }

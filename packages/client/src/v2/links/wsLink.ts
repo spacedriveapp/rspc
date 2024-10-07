@@ -1,7 +1,7 @@
 import type { Request as RspcRequest } from '../../bindings'
 import type { Link } from './link'
 
-import { AlphaRSPCError } from '../error'
+import { RSPCError } from '../../error'
 
 const timeouts = [1000, 2000, 5000, 10000] // In milliseconds
 
@@ -18,8 +18,8 @@ function newWsManager(opts: WsLinkOpts) {
   const activeMap = new Map<
     string,
     {
-      resolve: (result: any) => void
-      reject: (error: Error | AlphaRSPCError) => void
+      resolve: (result: unknown) => void
+      reject: (error: Error | RSPCError) => void
     }
   >()
 
@@ -35,7 +35,7 @@ function newWsManager(opts: WsLinkOpts) {
           activeMap.delete(id)
         } else if (result.type === 'error') {
           const { message, code } = result.data
-          activeMap.get(id)?.reject(new AlphaRSPCError(code, message))
+          activeMap.get(id)?.reject(new RSPCError(code, message))
           activeMap.delete(id)
         } else {
           console.error(`rspc: received event of unknown type '${result.type}'`)
@@ -52,8 +52,7 @@ function newWsManager(opts: WsLinkOpts) {
 
   const reconnectWs = (timeoutIndex = 0) => {
     let timeout =
-      // @ts-expect-error // TODO: Fix this
-      (timeouts[timeoutIndex] ?? timeouts[timeouts.length - 1]) +
+      (timeouts[timeoutIndex] ?? timeouts[timeouts.length - 1] ?? 0) +
       (Math.floor(Math.random() * 5000 /* 5 Seconds */) + 1)
 
     setTimeout(() => {
@@ -113,8 +112,8 @@ export function wsLink(opts: WsLinkOpts): Link {
         })
 
         if (op.type === 'subscriptionStop') {
-          if (op.input === null || typeof op.input === 'string' || typeof op.input === 'number') {
-            send({ id: op.id, method: op.type, params: { input: op.input } })
+          if (op.input == null || typeof op.input === 'string' || typeof op.input === 'number') {
+            send({ id: op.id, method: op.type, params: { input: op.input ?? null } })
           } else {
             throw new Error('Invalid input for subscriptionStop')
           }
@@ -177,15 +176,29 @@ export function wsBatchLink(opts: WsLinkOpts): Link {
           reject,
         })
 
-        // @ts-expect-error // TODO: Fix this
-        batch.push({
-          id: op.id,
-          method: op.type,
-          params: {
-            path: op.path,
-            input: op.input,
-          },
-        })
+        if (op.type === 'subscriptionStop') {
+          if (op.input != null && typeof op.input !== 'string' && typeof op.input !== 'number') {
+            throw new Error(
+              `Expected 'input' to be of type 'string' or 'number' for 'subscriptionStop', but got ${typeof op.input}`
+            )
+          }
+          batch.push({
+            id: op.id,
+            method: op.type,
+            params: {
+              input: op.input ?? null,
+            },
+          })
+        } else {
+          batch.push({
+            id: op.id,
+            method: op.type,
+            params: {
+              path: op.path,
+              input: op.input,
+            },
+          })
+        }
         queueBatch()
       },
       abort() {

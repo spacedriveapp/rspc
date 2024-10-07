@@ -1,6 +1,6 @@
 {
-  "name": "@oscartbeaumont-sd/rspc-client",
-  "version": "0.1.3",
+  "name": "@spacedrive/rspc-client",
+  "version": "0.2.0",
   "description": "A blazingly fast and easy to use TRPC-like server for Rust.",
   "keywords": [],
   "author": "Oscar Beaumont",

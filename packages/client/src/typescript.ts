@@ -2,7 +2,7 @@
 export type OperationType = 'query' | 'mutation' | 'subscription' | 'subscriptionStop'
 
 // TODO
-export type ProcedureDef = { key: string; input: any; result: any }
+export type ProcedureDef = { key: string; input: unknown; result: unknown }
 
 /**
  * This type represents the Typescript bindings which are generated from the router by Rust.
@@ -110,7 +110,7 @@ export type inferSubscriptionResult<
 // TODO
 
 export type inferInfiniteQueries<TProcedures extends ProceduresLike> = Exclude<
-  Extract<inferProcedures<TProcedures>['queries'], { input: { cursor: any } }>,
+  Extract<inferProcedures<TProcedures>['queries'], { input: { cursor: unknown } }>,
   { input: never }
 >
 

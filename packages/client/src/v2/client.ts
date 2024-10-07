@@ -5,20 +5,17 @@ import type {
   inferProcedureResult,
   inferQueryResult,
   ProceduresDef,
-} from '..'
-import type { Link, LinkResult, Operation, OperationContext } from '../v2'
+} from '../typescript'
+import type { Link, LinkResult, Operation, OperationContext } from './links/link'
 
-import { AlphaRSPCError } from '../v2'
+import { RSPCError } from '../error'
 
-// TODO
 export interface SubscriptionOptions<TOutput> {
-  // onStarted?: () => void;
   onData: (data: TOutput) => void
-  // TODO: Probs remove `| Error` here
-  onError?: (err: AlphaRSPCError | Error) => void
+  onError?: (err: RSPCError) => void
 }
 
-type KeyAndInput = [string] | [string, any]
+export type KeyAndInput = [string, ...unknown[]]
 
 type OperationOpts = {
   signal?: AbortSignal
@@ -26,10 +23,9 @@ type OperationOpts = {
   // skipBatch?: boolean; // TODO: Make this work + add this to React
 }
 
-// TODO
 interface ClientArgs {
   links: Link[]
-  onError?: (err: AlphaRSPCError) => void | Promise<void>
+  onError?: (err: RSPCError) => void | Promise<void>
 }
 
 export function initRspc<P extends ProceduresDef>(args: ClientArgs) {
@@ -38,11 +34,10 @@ export function initRspc<P extends ProceduresDef>(args: ClientArgs) {
 
 const generateRandomId = () => Math.random().toString(36).slice(2)
 
-// TODO: This will replace old client
 export class AlphaClient<P extends ProceduresDef> {
   private links: Link[]
-  private onError?: (err: AlphaRSPCError) => void | Promise<void>
-  private mapQueryKey?: (keyAndInput: KeyAndInput) => KeyAndInput // TODO: Do something so a single React.context can handle multiple of these
+  private onError?: (err: RSPCError) => void | Promise<void>
+  mapQueryKey?: (keyAndInput: KeyAndInput) => KeyAndInput // TODO: Do something so a single React.context can handle multiple of these
 
   constructor(args: ClientArgs) {
     if (args.links.length === 0) {
@@ -58,7 +53,7 @@ export class AlphaClient<P extends ProceduresDef> {
     opts?: OperationOpts
   ): Promise<inferQueryResult<P, K>> {
     try {
-      const keyAndInput2 = this.mapQueryKey ? this.mapQueryKey(keyAndInput as any) : keyAndInput
+      const keyAndInput2 = this.mapQueryKey?.(keyAndInput) ?? keyAndInput
 
       const result = exec(
         {
@@ -66,7 +61,7 @@ export class AlphaClient<P extends ProceduresDef> {
           type: 'query',
           input: keyAndInput2[1],
           path: keyAndInput2[0],
-          context: opts?.context || {},
+          context: opts?.context ?? {},
         },
         this.links
       )
@@ -74,9 +69,7 @@ export class AlphaClient<P extends ProceduresDef> {
 
       return await new Promise(result.exec)
     } catch (err) {
-      if (this.onError) {
-        this.onError(err as AlphaRSPCError)
-      }
+      if (this.onError && err instanceof RSPCError) await this.onError(err)
       throw err
     }
   }
@@ -86,7 +79,7 @@ export class AlphaClient<P extends ProceduresDef> {
     opts?: OperationOpts
   ): Promise<inferMutationResult<P, K>> {
     try {
-      const keyAndInput2 = this.mapQueryKey ? this.mapQueryKey(keyAndInput as any) : keyAndInput
+      const keyAndInput2 = this.mapQueryKey?.(keyAndInput) ?? keyAndInput
 
       const result = exec(
         {
@@ -94,7 +87,7 @@ export class AlphaClient<P extends ProceduresDef> {
           type: 'mutation',
           input: keyAndInput2[1],
           path: keyAndInput2[0],
-          context: opts?.context || {},
+          context: opts?.context ?? {},
         },
         this.links
       )
@@ -102,23 +95,20 @@ export class AlphaClient<P extends ProceduresDef> {
 
       return await new Promise(result.exec)
     } catch (err) {
-      if (this.onError) {
-        this.onError(err as AlphaRSPCError)
-      }
+      if (this.onError && err instanceof RSPCError) await this.onError(err)
       throw err
     }
   }
 
-  // TODO: Handle resubscribing if the subscription crashes similar to what Tanstack Query does
-  addSubscription<
+  async addSubscription<
     K extends P['subscriptions']['key'] & string,
     TData = inferProcedureResult<P, 'subscriptions', K>,
   >(
     keyAndInput: [K, ..._inferProcedureHandlerInput<P, 'subscriptions', K>],
     opts: SubscriptionOptions<TData> & { context?: OperationContext }
-  ): () => void {
+  ): Promise<() => void> {
     try {
-      const keyAndInput2 = this.mapQueryKey ? this.mapQueryKey(keyAndInput as any) : keyAndInput
+      const keyAndInput2 = this.mapQueryKey?.(keyAndInput) ?? keyAndInput
 
       const result = exec(
         {
@@ -126,34 +116,38 @@ export class AlphaClient<P extends ProceduresDef> {
           type: 'subscription',
           input: keyAndInput2[1],
           path: keyAndInput2[0],
-          context: opts?.context || {},
+          context: opts.context ?? {},
         },
         this.links
       )
 
       result.exec(
-        data => opts?.onData(data),
-        err => opts?.onError?.(err)
+        data => opts.onData(data as TData),
+        err => {
+          if (err instanceof RSPCError) opts.onError?.(err)
+          console.error(err)
+        }
       )
       return result.abort
     } catch (err) {
-      if (this.onError) {
-        this.onError(err as AlphaRSPCError)
+      if (err instanceof RSPCError) {
+        if (this.onError) await this.onError(err)
+        return () => {}
       }
-      return () => {}
+
+      throw err
     }
   }
 
-  // TODO: Remove this once middleware system is in place
   dangerouslyHookIntoInternals<P2 extends ProceduresDef = P>(opts?: {
     mapQueryKey?: (keyAndInput: KeyAndInput) => KeyAndInput
   }): AlphaClient<P2> {
     this.mapQueryKey = opts?.mapQueryKey
-    return this as any
+    return this as unknown as AlphaClient<P2>
   }
 }
 
-function exec(op: Operation, links: Link[]) {
+function exec(op: Operation, links: Link[]): LinkResult {
   if (!links[0]) throw new Error('No links provided')
 
   let prevLinkResult: LinkResult = {
@@ -165,8 +159,8 @@ function exec(op: Operation, links: Link[]) {
     abort: () => {},
   }
 
-  for (var linkIndex = 0; linkIndex < links.length; linkIndex++) {
-    const link = links[links.length - linkIndex - 1]
+  for (let linkIndex = links.length - 1; linkIndex >= 0; linkIndex--) {
+    const link = links[linkIndex]
     if (!link) continue
     const result = link({
       op,

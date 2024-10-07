@@ -1,6 +1,6 @@
-// @ts-nocheck No one asked
+import type { Link, RspcRequest, RspcResponse } from '@spacedrive/rspc-client'
 
-import { AlphaRSPCError, Link, RspcRequest } from '@oscartbeaumont-sd/rspc-client/src/v2'
+import { RSPCError } from '@spacedrive/rspc-client'
 import { listen } from '@tauri-apps/api/event'
 import { Window } from '@tauri-apps/api/window'
 
@@ -9,15 +9,14 @@ import { Window } from '@tauri-apps/api/window'
  */
 export function tauriLink(): Link {
   const activeMap = new Map<
-    string,
+    string | number,
     {
-      resolve: (result: any) => void
-      reject: (error: Error | AlphaRSPCError) => void
+      resolve: (result: unknown) => void
+      reject: (error: Error | RSPCError) => void
     }
   >()
-  // @ts-ignore-error
-  const listener = listen('plugin:rspc:transport:resp', event => {
-    const { id, result } = event.payload as any
+  const listener = listen<RspcResponse>('plugin:rspc:transport:resp', event => {
+    const { id, result } = event.payload
     if (activeMap.has(id)) {
       if (result.type === 'event') {
         activeMap.get(id)?.resolve(result.data)
@@ -26,7 +25,7 @@ export function tauriLink(): Link {
         activeMap.delete(id)
       } else if (result.type === 'error') {
         const { message, code } = result.data
-        activeMap.get(id)?.reject(new AlphaRSPCError(code, message))
+        activeMap.get(id)?.reject(new RSPCError(code, message))
         activeMap.delete(id)
       } else {
         console.error(`rspc: received event of unknown type '${result.type}'`)
@@ -39,21 +38,20 @@ export function tauriLink(): Link {
   const batch: RspcRequest[] = []
   let batchQueued = false
   const queueBatch = () => {
-    if (!batchQueued) {
-      batchQueued = true
-      setTimeout(() => {
-        const currentBatch = [...batch]
-        batch.splice(0, batch.length)
-        batchQueued = false
-        ;(async () => {
-          if (!listener) {
-            await listener
-          }
+    if (batchQueued) return
+    batchQueued = true
 
-          await Window.getCurrent().emit('plugin:rspc:transport', currentBatch)
-        })()
-      })
-    }
+    setTimeout(() => {
+      const currentBatch = [...batch]
+      // Reset the batch
+      batch.length = 0
+      batchQueued = false
+      listener
+        .then(() => Window.getCurrent().emit('plugin:rspc:transport', currentBatch))
+        .catch(err => {
+          console.error('Failed to emit to plugin:rspc:transport', err)
+        })
+    })
   }
 
   return ({ op }) => {
@@ -65,15 +63,29 @@ export function tauriLink(): Link {
           reject,
         })
 
-        // @ts-ignore-error
-        batch.push({
-          id: op.id,
-          method: op.type,
-          params: {
-            path: op.path,
-            input: op.input,
-          },
-        })
+        if (op.type === 'subscriptionStop') {
+          if (op.input != null && typeof op.input !== 'string' && typeof op.input !== 'number') {
+            throw new Error(
+              `Expected 'input' to be of type 'string' or 'number' for 'subscriptionStop', but got ${typeof op.input}`
+            )
+          }
+          batch.push({
+            id: op.id,
+            method: op.type,
+            params: {
+              input: op.input ?? null,
+            },
+          })
+        } else {
+          batch.push({
+            id: op.id,
+            method: op.type,
+            params: {
+              path: op.path,
+              input: op.input,
+            },
+          })
+        }
         queueBatch()
       },
       abort() {

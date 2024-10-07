@@ -7,8 +7,7 @@ description = "A blazing fast and easy to use TRPC server for Rust."
 edition     = "2021"
 license     = "MIT"
 
-documentation = "https://docs.rs/rspc/latest/rspc"
-repository    = "https://github.com/oscartbeaumont/rspc"
+repository = "https://github.com/spacedriveapp/rspc"
 
 categories = ["asynchronous", "web-programming"]
 include    = ["/LICENCE", "/README.md", "/src"]

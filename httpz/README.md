@@ -45,4 +45,4 @@ httpz is primarily designed to make life easier for library authors. It allows a
 
 Libraries using httpz:
 
-- [rspc](https://github.com/oscartbeaumont/rspc)
+- [rspc](https://github.com/spacedriveapp/rspc)

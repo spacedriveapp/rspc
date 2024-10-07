@@ -1,24 +1,24 @@
 {
-  "name": "@oscartbeaumont-sd/rspc-react",
-  "version": "0.1.3",
+  "name": "@spacedrive/rspc-react",
+  "version": "0.2.0",
   "description": "A blazingly fast and easy to use TRPC-like server for Rust.",
   "keywords": [],
   "author": "Oscar Beaumont",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "src/v2.ts",
   "scripts": {
     "test": "echo 'No tests yet.' >&2 && exit 1"
   },
   "dependencies": {
-    "@tanstack/react-query": "^4.36.1"
+    "@tanstack/react-query": "^5.59"
   },
   "devDependencies": {
     "@types/react": "^18.3.11",
     "react": "^18.3.1",
-    "@oscartbeaumont-sd/rspc-client": "workspace:*"
+    "@spacedrive/rspc-client": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.3.1",
-    "@oscartbeaumont-sd/rspc-client": "^0.1.3"
+    "@spacedrive/rspc-client": "^1.0"
   }
 }

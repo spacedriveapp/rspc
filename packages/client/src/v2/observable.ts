@@ -1,13 +1,14 @@
 /**
- * TODO
+ * A function type that represents an abort operation.
  *
  * @internal
  */
 export type AbortFn = () => void
 
 /**
- * TODO
+ * Represents a promise along with a function to cancel the operation.
  *
+ * @template TValue The type of the value that the promise resolves to.
  * @internal
  */
 export type PromiseAndCancel<TValue> = {
@@ -16,8 +17,8 @@ export type PromiseAndCancel<TValue> = {
 }
 
 /**
- * TODO
+ * Represents a fake observable with an execution method that returns a promise and a cancel function.
  *
  * @internal
  */
-export type FakeObservable = { exec: () => PromiseAndCancel<any> }
+export type FakeObservable = { exec: () => PromiseAndCancel<unknown> }

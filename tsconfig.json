@@ -2,6 +2,7 @@
   "compilerOptions": {
     // Enable latest features
     "lib": ["ESNext", "DOM"],
+    "jsx": "react",
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
@@ -37,9 +38,11 @@
   },
   "include": [
     "**/*.js",
+    "**/*.jsx",
     "**/*.mjs",
     "**/*.cjs",
     "**/*.ts",
+    "**/*.tsx",
     "**/*.d.ts",
     "**/*.d.mts",
     "**/*.d.cts"

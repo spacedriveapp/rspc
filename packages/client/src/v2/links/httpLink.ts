@@ -1,6 +1,6 @@
 import type { Link, Operation } from './link'
 
-import { AlphaRSPCError } from '../error'
+import { RSPCError } from '../../error'
 
 type HTTPHeaders = Record<string, string | string[] | undefined>
 
@@ -36,7 +36,7 @@ export function httpLink(opts: HttpLinkOpts): Link {
       exec: async (resolve, reject) => {
         if (op.type === 'subscription' || op.type === 'subscriptionStop') {
           reject(
-            // TODO: Move to `AlphaRSPCError` type??
+            // TODO: Move to `RSPCError` type??
             new Error(
               `Subscribing to '${op.path}' failed as the HTTP transport does not support subscriptions! Maybe try using the websocket transport?`
             )
@@ -45,7 +45,7 @@ export function httpLink(opts: HttpLinkOpts): Link {
         }
 
         let method = 'GET'
-        let body = undefined as any
+        let body: BodyInit | null = null
         let headers = new Headers()
 
         const defaultHeaders =
@@ -83,15 +83,15 @@ export function httpLink(opts: HttpLinkOpts): Link {
             signal: abort.signal,
           }
         )
+        // TODO: validate response
         const respBody = await resp.json()
         const { type, data } = respBody.result
         if (type === 'error') {
           const { code, message } = data
-          reject(new AlphaRSPCError(code, message))
-          return
+          reject(new RSPCError(code, message))
+        } else {
+          resolve(data)
         }
-
-        resolve(data)
       },
       execBatch: async () => {},
       abort() {
@@ -110,8 +110,8 @@ type HttpBatchLinkOpts = BaseHttpLinkOpts & {
 
 type BatchedItem = {
   op: Operation
-  resolve: (result: any) => void
-  reject: (error: Error | AlphaRSPCError) => void
+  resolve: (result: unknown) => void
+  reject: (error: Error | RSPCError) => void
   abort: AbortController
 }
 
@@ -156,8 +156,13 @@ export function httpBatchLink(opts: HttpBatchLinkOpts): Link {
       ),
     })
 
-    // TODO: Get this type instead of using `any`
-    const body: any[] = await resp.json()
+    // TODO: Validate response
+    const body: unknown = await resp.json()
+    if (!Array.isArray(body)) {
+      console.error('rspc: batch response not an array!')
+      return
+    }
+
     if (body.length !== batch.length) {
       console.error('rspc: batch response length mismatch!')
       return
@@ -172,7 +177,7 @@ export function httpBatchLink(opts: HttpBatchLinkOpts): Link {
       if (item.result.type === 'response') {
         batch[i]?.resolve(item.result.data)
       } else if (item.result.type === 'error') {
-        batch[i]?.reject(new AlphaRSPCError(item.result.data.code, item.result.data.message))
+        batch[i]?.reject(new RSPCError(item.result.data.code, item.result.data.message))
       } else {
         console.error('rspc: batch response type mismatch!')
       }
@@ -198,7 +203,7 @@ export function httpBatchLink(opts: HttpBatchLinkOpts): Link {
       exec: async (resolve, reject) => {
         if (op.type === 'subscription' || op.type === 'subscriptionStop') {
           reject(
-            // TODO: Move to `AlphaRSPCError` type??
+            // TODO: Move to `RSPCError` type??
             new Error(
               `Subscribing to '${op.path}' failed as the HTTP transport does not support subscriptions! Maybe try using the websocket transport?`
             )

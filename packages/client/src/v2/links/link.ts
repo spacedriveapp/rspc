@@ -1,4 +1,4 @@
-import { AlphaRSPCError } from '../error'
+import { RSPCError } from '../../error'
 
 /**
  * A map of data that can be used by links to store metadata about the current operation.
@@ -29,7 +29,7 @@ export interface Operation {
  * @internal
  */
 export type LinkResult = {
-  exec: (resolve: (result: any) => void, reject: (error: Error | AlphaRSPCError) => void) => void
+  exec: (resolve: (result: unknown) => void, reject: (error: Error | RSPCError) => void) => void
   abort: () => void
 }
 

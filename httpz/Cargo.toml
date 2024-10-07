@@ -7,10 +7,8 @@ description = "Code once, support every Rust webserver!"
 edition     = "2021"
 license     = "MIT"
 
-documentation = "https://docs.rs/httpz"
-homepage      = "https://github.com/oscartbeaumont/httpz"
-readme        = "README.md"
-repository    = "https://github.com/oscartbeaumont/httpz"
+readme     = "README.md"
+repository = "https://github.com/spacedriveapp/rspc/tree/main/httpz"
 
 categories = [
 	"asynchronous",

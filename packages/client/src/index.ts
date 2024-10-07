@@ -1,4 +1,10 @@
-export * from './client'
-export * from './transport'
 export * from './error'
 export * from './typescript'
+export * from './v2/client'
+export * from './v2/observable'
+export * from './v2/links/link'
+export * from './v2/links/httpLink'
+export * from './v2/links/wsLink'
+export * from './v2/links/loggerLink'
+
+export type { Request as RspcRequest, Response as RspcResponse } from './bindings'

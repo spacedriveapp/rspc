@@ -1,34 +1,32 @@
-import {
+import type {
   _inferInfiniteQueryProcedureHandlerInput,
   _inferProcedureHandlerInput,
-  inferInfiniteQueries,
-  inferInfiniteQueryResult,
   inferMutationInput,
   inferMutationResult,
   inferProcedureResult,
   inferQueryInput,
   inferQueryResult,
+  KeyAndInput,
   ProceduresDef,
-} from '@oscartbeaumont-sd/rspc-client'
-import { AlphaClient, AlphaRSPCError } from '@oscartbeaumont-sd/rspc-client/src/v2'
-import {
-  useInfiniteQuery as __useInfiniteQuery,
-  useMutation as __useMutation,
-  useQuery as __useQuery,
-  hashQueryKey,
-  QueryClient,
-  QueryClientProvider,
-  UseInfiniteQueryOptions,
-  UseInfiniteQueryResult,
+} from '@spacedrive/rspc-client'
+import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query'
-import React, { useContext as _useContext, createContext, ReactElement, useEffect } from 'react'
+import type { ReactElement } from 'react'
 
-// TODO: Reuse one from client but don't export it in public API
-type KeyAndInput = [string] | [string, any]
+import { AlphaClient, RSPCError } from '@spacedrive/rspc-client'
+import {
+  useInfiniteQuery as __useInfiniteQuery,
+  useMutation as __useMutation,
+  useQuery as __useQuery,
+  hashKey,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import React, { useContext as _useContext, createContext, useEffect, useMemo } from 'react'
 
 export interface BaseOptions<TProcedures extends ProceduresDef> {
   rspc?: {
@@ -40,8 +38,7 @@ export interface SubscriptionOptions<TOutput> {
   enabled?: boolean
   onStarted?: () => void
   onData: (data: TOutput) => void
-  // TODO: Not `| Error`
-  onError?: (err: AlphaRSPCError | Error) => void
+  onError?: (err: RSPCError | Error) => void
 }
 
 export interface Context<TProcedures extends ProceduresDef> {
@@ -49,11 +46,16 @@ export interface Context<TProcedures extends ProceduresDef> {
   queryClient: QueryClient
 }
 
-// TODO: Share with SolidJS hooks if possible?
 export type HooksOpts<P extends ProceduresDef> = {
   context: React.Context<Context<P>>
 }
 
+/**
+ * Creates React Query hooks for the given RSPC client.
+ * @param client - The RSPC client.
+ * @param opts - Optional hooks options.
+ * @returns An object containing the hooks and provider component.
+ */
 export function createReactQueryHooks<P extends ProceduresDef>(
   client: AlphaClient<P>,
   opts?: HooksOpts<P>
@@ -61,12 +63,13 @@ export function createReactQueryHooks<P extends ProceduresDef>(
   type TBaseOptions = BaseOptions<P>
 
   const mapQueryKey: (keyAndInput: KeyAndInput) => KeyAndInput =
-    (client as any).mapQueryKey || (x => x)
-  const Context = opts?.context || createContext<Context<P>>(undefined!)
+    client.mapQueryKey ?? ((x: KeyAndInput) => x)
+  const Context =
+    opts?.context ?? createContext<Context<P>>({ client, queryClient: new QueryClient() })
 
   function useContext() {
     const ctx = _useContext(Context)
-    if (ctx?.queryClient === undefined)
+    if (ctx?.queryClient == null)
       throw new Error(
         'The rspc context has not been set. Ensure you have the <rspc.Provider> component higher up in your component tree.'
       )
@@ -80,52 +83,20 @@ export function createReactQueryHooks<P extends ProceduresDef>(
   >(
     keyAndInput: [key: K, ...input: _inferProcedureHandlerInput<P, 'queries', K>],
     opts?: Omit<
-      UseQueryOptions<TQueryFnData, AlphaRSPCError, TData, [K, inferQueryInput<P, K>]>,
+      UseQueryOptions<TQueryFnData, RSPCError, TData, [K, inferQueryInput<P, K>]>,
       'queryKey' | 'queryFn'
     > &
       TBaseOptions
-  ): UseQueryResult<TData, AlphaRSPCError> {
+  ): UseQueryResult<TData, RSPCError> {
     const { rspc, ...rawOpts } = opts ?? {}
-    let client = rspc?.client
-    if (!client) {
-      client = useContext().client
-    }
+    const client = rspc?.client ?? useContext().client
 
     return __useQuery({
-      queryKey: mapQueryKey(keyAndInput as any) as any,
+      queryKey: mapQueryKey(keyAndInput) as [K, inferQueryInput<P, K>],
       queryFn: async () => {
-        return await client!.query(keyAndInput)
+        return (await client.query(keyAndInput)) as TQueryFnData
       },
       ...rawOpts,
-    })
-  }
-
-  function useInfiniteQuery<K extends inferInfiniteQueries<P>['key'] & string>(
-    keyAndInput: [key: K, ...input: _inferInfiniteQueryProcedureHandlerInput<P, K>],
-    opts?: Omit<
-      UseInfiniteQueryOptions<
-        inferInfiniteQueryResult<P, K>,
-        AlphaRSPCError,
-        inferInfiniteQueryResult<P, K>,
-        inferInfiniteQueryResult<P, K>,
-        [K, inferQueryInput<P, K>]
-      >,
-      'queryKey' | 'queryFn'
-    > &
-      TBaseOptions
-  ): UseInfiniteQueryResult<inferInfiniteQueryResult<P, K>, AlphaRSPCError> {
-    const { rspc, ...rawOpts } = opts ?? {}
-    let client = rspc?.client
-    if (!client) {
-      client = useContext().client
-    }
-
-    return __useInfiniteQuery({
-      queryKey: mapQueryKey(keyAndInput as any),
-      queryFn: async () => {
-        throw new Error('TODO') // TODO: Finish this
-      },
-      ...(rawOpts as any),
     })
   }
 
@@ -133,27 +104,30 @@ export function createReactQueryHooks<P extends ProceduresDef>(
     key: K | [K],
     opts?: UseMutationOptions<
       inferMutationResult<P, K>,
-      AlphaRSPCError,
+      RSPCError,
       inferMutationInput<P, K> extends never ? undefined : inferMutationInput<P, K>,
       TContext
     > &
       TBaseOptions
   ): UseMutationResult<
     inferMutationResult<P, K>,
-    AlphaRSPCError,
+    RSPCError,
     inferMutationInput<P, K> extends never ? undefined : inferMutationInput<P, K>,
     TContext
   > {
     const { rspc, ...rawOpts } = opts ?? {}
-    let client = rspc?.client
-    if (!client) {
-      client = useContext().client
-    }
+    const client = rspc?.client ?? useContext().client
 
-    return __useMutation(async (input: any) => {
-      const actualKey = Array.isArray(key) ? key[0] : key
-      return client!.mutation([actualKey, input] as any)
-    }, rawOpts as any)
+    return __useMutation({
+      mutationFn: async (...input: inferMutationInput<P, K>[]) => {
+        const actualKey = Array.isArray(key) ? key[0] : key
+        return client.mutation([
+          actualKey,
+          ...(input as _inferProcedureHandlerInput<P, 'mutations', K>),
+        ])
+      },
+      ...rawOpts,
+    })
   }
 
   function useSubscription<
@@ -163,47 +137,43 @@ export function createReactQueryHooks<P extends ProceduresDef>(
     keyAndInput: [key: K, ...input: _inferProcedureHandlerInput<P, 'subscriptions', K>],
     opts: SubscriptionOptions<TData> & TBaseOptions
   ) {
-    let client = opts?.rspc?.client
-    if (!client) {
-      client = useContext().client
-    }
-    const queryKey = hashQueryKey(keyAndInput)
+    const client = opts?.rspc?.client ?? useContext().client
+    const queryKey = hashKey(keyAndInput)
     const enabled = opts?.enabled ?? true
 
-    return useEffect(() => {
+    useEffect(() => {
       if (!enabled) {
         return
       }
-      return client!.addSubscription<K, TData>(keyAndInput, {
+      const subscription = client.addSubscription<K, TData>(keyAndInput, {
         onData: opts.onData,
         onError: opts.onError,
       })
+      return () => {
+        subscription.then(unsubscribe => unsubscribe())
+      }
     }, [queryKey, enabled])
   }
 
-  return {
-    _rspc_def: undefined! as P, // This allows inferring the operations type from TS helpers
-    Provider: ({
-      children,
-      client,
-      queryClient,
-    }: {
-      children?: ReactElement
-      client: AlphaClient<P>
-      queryClient: QueryClient
-    }) => (
-      <Context.Provider
-        value={{
-          client,
-          queryClient,
-        }}
-      >
+  const Provider: React.FC<{
+    children?: ReactElement
+    client: AlphaClient<P>
+    queryClient: QueryClient
+  }> = ({ children, client, queryClient }) => {
+    const contextValue = useMemo(() => ({ client, queryClient }), [client, queryClient])
+
+    return (
+      <Context.Provider value={contextValue}>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </Context.Provider>
-    ),
+    )
+  }
+
+  return {
+    _rspc_def: {} as P, // This allows inferring the operations type from TS helpers
+    Provider,
     useContext,
     useQuery,
-    // useInfiniteQuery,
     useMutation,
     useSubscription,
   }
