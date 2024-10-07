@@ -11,6 +11,5 @@ pub enum Error {
     Utf8,
     /// TODO
     #[error("UTF-8 encoding error")]
-    #[cfg(feature = "tokio-ws")]
     TungsteniteError(#[from] async_tungstenite::tungstenite::Error),
 }

@@ -37,17 +37,3 @@ pub use router_builder::*;
 
 pub mod integrations;
 pub mod internal;
-
-#[cfg(debug_assertions)]
-#[allow(clippy::panic)]
-// #[deprecated = "Being removed in `v1.0.0`. You can copy this helper into your own codebase if you still need it."] // TODO
-pub fn test_result_type<T: specta::Type + serde::Serialize>() {
-    panic!("You should not call `test_type` at runtime. This is just a debugging tool.");
-}
-
-#[cfg(debug_assertions)]
-#[allow(clippy::panic)]
-// #[deprecated = "Being removed in `v1.0.0`. You can copy this helper into your own codebase if you still need it."] // TODO
-pub fn test_result_value<T: specta::Type + serde::Serialize>(_: T) {
-    panic!("You should not call `test_type` at runtime. This is just a debugging tool.");
-}

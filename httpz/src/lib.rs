@@ -11,7 +11,6 @@ mod server;
 mod servers;
 
 /// is the module containing code related to handling incoming websockets.
-#[cfg(feature = "ws")]
 pub mod ws;
 
 pub use endpoint::*;
@@ -21,6 +20,5 @@ pub use request::*;
 pub use response::*;
 pub use server::*;
 pub use servers::*;
-
 pub use form_urlencoded;
 pub use http;

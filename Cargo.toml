@@ -1,15 +1,18 @@
 [package]
-authors       = ["Oscar Beaumont <oscar@otbeaumont.me>"]
-categories    = ["asynchronous", "web-programming"]
-description   = "A blazing fast and easy to use TRPC server for Rust."
+name    = "rspc"
+version = "0.1.4"
+
+authors     = ["Oscar Beaumont <oscar@otbeaumont.me>"]
+description = "A blazing fast and easy to use TRPC server for Rust."
+edition     = "2021"
+license     = "MIT"
+
 documentation = "https://docs.rs/rspc/latest/rspc"
-edition       = "2021"
-include       = ["/LICENCE", "/README.md", "/src"]
-keywords      = ["async", "rust-to-ts", "specta", "typesafe", "typescript"]
-license       = "MIT"
-name          = "rspc"
 repository    = "https://github.com/oscartbeaumont/rspc"
-version       = "0.1.4"
+
+categories = ["asynchronous", "web-programming"]
+include    = ["/LICENCE", "/README.md", "/src"]
+keywords   = ["async", "rust-to-ts", "specta", "typesafe", "typescript"]
 
 # /bin/sh RUSTDOCFLAGS="--cfg docsrs" cargo +nightly doc --all-features
 [package.metadata."docs.rs"]
@@ -18,16 +21,13 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 default = []
-httpz   = ["dep:httpz"]
-tauri   = ["dep:tauri"]
-# openapi = ["dep:openapiv3"]
-anyhow = ["dep:anyhow"]
 
-alpha    = [] # APIs that are not yet stable
-unstable = [] # APIs where one line of code can blow up your whole app
+alpha    = []            # APIs that are not yet stable
+tauri    = ["dep:tauri"]
+unstable = []            # APIs where one line of code can blow up your whole app
 
 # Webservers
-axum = ["dep:httpz", "httpz/axum", "httpz/tokio-ws"]
+axum = ["dep:httpz"]
 
 # Specta # TODO: Remove all of these with v1
 bigdecimal   = ["specta/bigdecimal"]
@@ -45,39 +45,25 @@ uhlc         = ["specta/uhlc"]
 uuid         = ["specta/uuid"]
 
 [dependencies]
+# Inner Sub-crates
 httpz = { path = "./httpz", optional = true }
 
-futures              = "0.3.28"
-futures-channel      = "0.3.28"
+# Dependencies
+futures              = "0.3.31"
+futures-channel      = "0.3.31"
 futures-locks        = { version = "0.7.1", features = ["tokio"] }
 nougat               = "0.2.4"
-pin-project          = "1.0"
+pin-project          = "1.1"
 serde                = { version = "1.0", features = ["derive"] }
 serde_json           = "1.0"
 specta               = { version = "=2.0.0-rc.20", features = ["derive", "serde", "serde_json"] }
 specta-datatype-from = { git = "https://github.com/specta-rs/specta", rev = "8509af0162" }
 specta-serde         = { version = "=0.0.7" }
 specta-typescript    = { version = "=0.0.7", features = ["function"] }
+tauri                = { version = "2.0.1", optional = true }
 thiserror            = "1.0"
 tokio                = { version = "1.40", features = ["macros", "rt", "sync"] }
 tracing              = { version = "0.1.37" }
-
-anyhow = { version = "1.0", optional = true }
-tauri  = { version = "2.0.1", optional = true }
-
-[dev-dependencies]
-# Tests
-async-stream = "0.3.6"
-
-# Benchmark
-criterion = { version = "0.5.1", features = ["async_tokio", "html_reports"] }
-pprof = { version = "0.13.0", features = [
-	"criterion",
-	"flamegraph",
-	"frame-pointer",
-	"protobuf-codec"
-] }
-tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
 
 [workspace]
 members = ["./httpz"]

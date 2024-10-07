@@ -21,10 +21,8 @@ pub enum Message {
     /// The payload here must have a length less than 125 bytes
     Pong(Vec<u8>),
     /// A close message with the optional close frame.
-    #[cfg(feature = "tokio-ws")]
     Close(Option<async_tungstenite::tungstenite::protocol::CloseFrame<'static>>),
     /// Raw frame. Note, that you're not going to get this value while reading the message.
-    #[cfg(feature = "tokio-ws")]
     Frame(async_tungstenite::tungstenite::protocol::frame::Frame),
 }
 
@@ -66,7 +64,6 @@ impl Message {
     }
 
     /// Indicates whether a message ia s close message.
-    #[cfg(feature = "tokio-ws")]
     pub fn is_close(&self) -> bool {
         matches!(*self, Message::Close(_))
     }
@@ -78,9 +75,7 @@ impl Message {
             Message::Binary(ref data) | Message::Ping(ref data) | Message::Pong(ref data) => {
                 data.len()
             }
-            #[cfg(feature = "tokio-ws")]
             Message::Close(ref data) => data.as_ref().map(|d| d.reason.len()).unwrap_or(0),
-            #[cfg(feature = "tokio-ws")]
             Message::Frame(ref frame) => frame.len(),
         }
     }
@@ -96,11 +91,8 @@ impl Message {
         match self {
             Message::Text(string) => string.into_bytes(),
             Message::Binary(data) | Message::Ping(data) | Message::Pong(data) => data,
-            #[cfg(feature = "tokio-ws")]
             Message::Close(None) => Vec::new(),
-            #[cfg(feature = "tokio-ws")]
             Message::Close(Some(frame)) => frame.reason.into_owned().into_bytes(),
-            #[cfg(feature = "tokio-ws")]
             Message::Frame(frame) => frame.into_data(),
         }
     }
@@ -112,11 +104,9 @@ impl Message {
             Message::Binary(data) | Message::Ping(data) | Message::Pong(data) => {
                 Ok(String::from_utf8(data).map_err(|_| Error::Utf8)?)
             }
-            #[cfg(feature = "tokio-ws")]
+
             Message::Close(None) => Ok(String::new()),
-            #[cfg(feature = "tokio-ws")]
             Message::Close(Some(frame)) => Ok(frame.reason.into_owned()),
-            #[cfg(feature = "tokio-ws")]
             Message::Frame(frame) => Ok(frame.into_string().map_err(|_| Error::Utf8)?),
         }
     }
@@ -129,11 +119,8 @@ impl Message {
             Message::Binary(ref data) | Message::Ping(ref data) | Message::Pong(ref data) => {
                 Ok(str::from_utf8(data).map_err(|_| Error::Utf8)?)
             }
-            #[cfg(feature = "tokio-ws")]
             Message::Close(None) => Ok(""),
-            #[cfg(feature = "tokio-ws")]
             Message::Close(Some(ref frame)) => Ok(&frame.reason),
-            #[cfg(feature = "tokio-ws")]
             Message::Frame(ref frame) => Ok(frame.to_text().map_err(|_| Error::Utf8)?),
         }
     }
@@ -187,7 +174,6 @@ impl fmt::Display for Message {
     }
 }
 
-#[cfg(feature = "tokio-ws")]
 impl From<async_tungstenite::tungstenite::Message> for Message {
     fn from(msg: async_tungstenite::tungstenite::Message) -> Self {
         match msg {
@@ -195,19 +181,12 @@ impl From<async_tungstenite::tungstenite::Message> for Message {
             async_tungstenite::tungstenite::Message::Binary(data) => Message::Binary(data),
             async_tungstenite::tungstenite::Message::Ping(data) => Message::Ping(data),
             async_tungstenite::tungstenite::Message::Pong(data) => Message::Pong(data),
-            #[cfg(feature = "tokio-ws")]
             async_tungstenite::tungstenite::Message::Close(frame) => Message::Close(frame),
-            #[cfg(not(feature = "tokio-ws"))]
-            async_tungstenite::tungstenite::Message::Close(frame) => unreachable!(),
-            #[cfg(feature = "tokio-ws")]
             async_tungstenite::tungstenite::Message::Frame(frame) => Message::Frame(frame),
-            #[cfg(not(feature = "tokio-ws"))]
-            async_tungstenite::tungstenite::Message::Frame(frame) => unreachable!(),
         }
     }
 }
 
-#[cfg(feature = "tokio-ws")]
 impl From<Message> for async_tungstenite::tungstenite::Message {
     fn from(v: Message) -> Self {
         match v {
@@ -215,9 +194,7 @@ impl From<Message> for async_tungstenite::tungstenite::Message {
             Message::Binary(data) => Self::Binary(data),
             Message::Ping(data) => Self::Ping(data),
             Message::Pong(data) => Self::Pong(data),
-            #[cfg(feature = "tokio-ws")]
             Message::Close(frame) => Self::Close(frame),
-            #[cfg(feature = "tokio-ws")]
             Message::Frame(frame) => Self::Frame(frame),
         }
     }

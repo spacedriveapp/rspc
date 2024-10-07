@@ -205,14 +205,3 @@ impl ErrorCode {
         }
     }
 }
-
-#[cfg(feature = "anyhow")]
-impl From<anyhow::Error> for Error {
-    fn from(_value: anyhow::Error) -> Self {
-        Error {
-            code: ErrorCode::InternalServerError,
-            message: "internal server error".to_string(),
-            cause: None, // TODO: Make this work
-        }
-    }
-}

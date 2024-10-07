@@ -1,14 +1,8 @@
-<div align="center">
-    <h1>httpz</h1>
-    <p><b>Code once, support every Rust webserver!</b></p>
-    <a href="https://discord.gg/JgqH8b4ycw"><img src="https://img.shields.io/discord/1011665225809924136?style=flat-square" alt="Discord"></a>
-    <a href="https://crates.io/crates/httpz"><img src="https://img.shields.io/crates/d/httpz?style=flat-square" alt="Crates.io"></a>
-    <a href="/LICENSE"><img src="https://img.shields.io/crates/l/httpz?style=flat-square" alt="License"></a>
-</div>
+<div align="center"><h1>httpz</h1></div>
 
 <br>
 
-This project is a 🚧 work in progress 🚧. Currently it is designed around the goals of [rspc](https://rspc.otbeaumont.me) but feel free to reach to me if you want to collaborate on using it in your own project.
+This project is designed around the goals of [spacedrive](https://github.com/spacedriveapp/spacedrive)'s fork of [rspc](https://github.com/spacedriveapp/rspc) and there is no intention to expand it besides that.
 
 ## Usage
 
@@ -40,19 +34,15 @@ HttpServer::new({
 // and so on...
 ```
 
-Check out the rest of the [examples](/examples)!
-
 ## Features
 
-- Write your HTTP handler once and support [Axum](https://github.com/tokio-rs/axum), [Actix Web](https://actix.rs/), [Poem](https://github.com/poem-web/poem), [Rocket](https://rocket.rs), [Warp](https://github.com/seanmonstar/warp) and more.
-- Support for websockets on compatible webservers.
+- Write your HTTP handler once and support [Axum](https://github.com/tokio-rs/axum).
+- Support for websockets.
 
 ## Projects using httpz
 
-httpz is primarily designed to make life easier for library authors. It allows a library author to write and test a HTTP endpoint once and know it will work for all major Rust HTTP servers.
+httpz is primarily designed to make life easier for library authors. It allows a library author to write and test a HTTP endpoint once and know it will work for Axum.
 
 Libraries using httpz:
 
 - [rspc](https://github.com/oscartbeaumont/rspc)
-
-If you are interested in using httpz and have questions jump in [the Discord](https://discord.gg/4V9M5sksw8)!

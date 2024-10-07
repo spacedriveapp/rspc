@@ -112,8 +112,8 @@ where
         let (prefix, prefix_valid) = is_invalid_router_prefix(prefix);
         if prefix_valid {
             panic!(
-            "RSPC error: attempted to merge a router with the prefix '{}', however this prefix is not allowed.",
-            prefix
+                "RSPC error: attempted to merge a router with the prefix '{}', however this prefix is not allowed.",
+                prefix
             );
         }
 

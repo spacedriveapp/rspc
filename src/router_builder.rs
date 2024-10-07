@@ -219,8 +219,8 @@ where
     {
         if is_invalid_procedure_name(key) {
             panic!(
-            "RSPC error: attempted to attach a query with the key '{}', however this name is not allowed.",
-            key
+                "RSPC error: attempted to attach a query with the key '{}', however this name is not allowed.",
+                key
             );
         }
 
@@ -263,8 +263,8 @@ where
     {
         if is_invalid_procedure_name(key) {
             panic!(
-            "RSPC error: attempted to attach a mutation with the key '{}', however this name is not allowed.",
-            key
+                "RSPC error: attempted to attach a mutation with the key '{}', however this name is not allowed.",
+                key
             );
         }
 
@@ -305,8 +305,8 @@ where
     {
         if is_invalid_procedure_name(key) {
             panic!(
-            "RSPC error: attempted to attach a subscription with the key '{}', however this name is not allowed.",
-            key
+                "RSPC error: attempted to attach a subscription with the key '{}', however this name is not allowed.",
+                key
             );
         }
 
@@ -351,8 +351,8 @@ where
         #[allow(clippy::panic)]
         if prefix_valid {
             panic!(
-            "RSPC error: attempted to merge a router with the prefix '{}', however this prefix is not allowed.",
-            prefix
+                "RSPC error: attempted to merge a router with the prefix '{}', however this prefix is not allowed.",
+                prefix
             );
         }
 

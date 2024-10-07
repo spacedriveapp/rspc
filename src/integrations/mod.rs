@@ -1,12 +1,12 @@
 //! Integrations with other crates such as Axum, Tauri, etc.
 //!
 
-#[cfg(feature = "httpz")]
-#[cfg_attr(docsrs, doc(cfg(feature = "httpz")))]
+#[cfg(feature = "axum")]
+#[cfg_attr(docsrs, doc(cfg(feature = "axum")))]
 pub mod httpz;
 
-#[cfg(feature = "httpz")]
-#[cfg_attr(docsrs, doc(cfg(feature = "httpz")))]
+#[cfg(feature = "axum")]
+#[cfg_attr(docsrs, doc(cfg(feature = "axum")))]
 pub(crate) mod httpz_extractors;
 
 #[cfg(feature = "tauri")]

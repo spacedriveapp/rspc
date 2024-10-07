@@ -1,3 +1,5 @@
+#![cfg(feature = "alpha")]
+
 //! This module contains Alpha APIs that are used **under the hood** by the legacy code.
 //! It's important that breaking changes to these APIs don't reach userspace!
 //!

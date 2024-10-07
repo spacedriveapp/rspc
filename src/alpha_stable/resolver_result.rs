@@ -1,14 +1,16 @@
 use std::{
-    future::{ready, Future, Ready},
+    future::{Future, Ready},
     marker::PhantomData,
     pin::Pin,
     task::{Context, Poll},
 };
 
-use futures::{
-    stream::{once, Once},
-    Stream,
-};
+use std::future::ready;
+
+use futures::{stream::Once, Stream};
+
+use futures::stream::once;
+
 use pin_project::pin_project;
 use serde::Serialize;
 use serde_json::Value;
@@ -26,6 +28,7 @@ pub enum FutureMarker {}
 
 /// TODO
 // TODO: Rename
+
 pub trait AlphaRequestLayer<TMarker> {
     type Result: Type;
     type Stream: Stream<Item = Result<Value, ExecError>> + Send + 'static;
@@ -38,6 +41,7 @@ pub trait AlphaRequestLayer<TMarker> {
 
 #[doc(hidden)]
 pub enum AlphaResultMarker {}
+
 impl<T> AlphaRequestLayer<AlphaResultMarker> for Result<T, Error>
 where
     T: Serialize + Type,
@@ -76,6 +80,7 @@ where
 
 #[doc(hidden)]
 pub enum AlphaFutureResultMarker {}
+
 impl<TFut, T> AlphaRequestLayer<AlphaFutureResultMarker> for TFut
 where
     TFut: Future<Output = Result<T, Error>> + Send + 'static,
@@ -116,6 +121,7 @@ where
 
 #[doc(hidden)]
 pub enum AlphaStreamMarker {}
+
 impl<TStream, T> AlphaRequestLayer<AlphaStreamMarker> for TStream
 where
     TStream: Stream<Item = T> + Send + Sync + 'static,

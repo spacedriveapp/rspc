@@ -2,7 +2,6 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Server {
     /// support for [Axum](https://github.com/tokio-rs/axum)
-    #[cfg(feature = "axum")]
     Axum,
 }
 
@@ -11,7 +10,6 @@ impl Server {
     #[allow(unreachable_patterns)]
     pub fn to_str(&self) -> &'static str {
         match self {
-            #[cfg(feature = "axum")]
             Self::Axum => "axum",
             _ => unreachable!(),
         }
@@ -21,7 +19,6 @@ impl Server {
     #[allow(unreachable_patterns)]
     pub fn supports_websockets(&self) -> bool {
         match self {
-            #[cfg(feature = "axum")]
             Self::Axum => true,
             _ => unreachable!(),
         }

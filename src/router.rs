@@ -86,9 +86,10 @@ export type Procedures = {{
 }};"#
         )?;
 
-        for (name, a, b) in detect_duplicate_type_names(&self.typ_store)
+        if let Some((name, a, b)) = detect_duplicate_type_names(&self.typ_store)
             .into_iter()
             .by_ref()
+            .next()
         {
             return Err(ExportError::TsExportErr(
                 specta_typescript::ExportError::DuplicateTypeName(name, a, b),
