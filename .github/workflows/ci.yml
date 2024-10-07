@@ -55,8 +55,12 @@ jobs:
       - name: Install Rust toolchain
         run: rustup toolchain install stable --profile minimal
 
-      - name: Build Rust crate
-        run: cargo build --all-features
+      - name: Install Rust dependencies
+        run: cargo install cargo-hack
+
+      - name: Check Rust crate
+        run: cargo hack check --feature-powerset --no-dev-deps \
+          --group-features bigdecimal,bit-vec,bson,bytesize,chrono,glam,indexmap,ipnetwork,mac_address,rust_decimal,time,uhlc,uuid
 
       - name: Check Rust format
         run: cargo fmt -- --check
