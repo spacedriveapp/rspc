@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::State,
+    body::to_bytes,
+    extract::{Request, State},
     routing::{on, MethodFilter},
     Router,
 };
-use http::{HeaderMap, Request, StatusCode};
-use hyper::{body::to_bytes, Body};
+use http::{header::CONTENT_LENGTH, HeaderMap, StatusCode};
 
 use crate::{Endpoint, HttpEndpoint, HttpResponse, Server};
 
@@ -24,23 +24,33 @@ where
         let (url, methods) = self.endpoint.register();
         let endpoint = Arc::new(self.endpoint);
 
-        let mut method_filter = MethodFilter::empty();
+        let mut method_filter: Option<MethodFilter> = None;
         for method in methods.as_ref().iter() {
-            method_filter.insert(
-                MethodFilter::try_from(method.clone())
-                    .expect("Error converting method to MethodFilter"),
-            );
+            let method = MethodFilter::try_from(method.clone())
+                .expect("Error converting method to MethodFilter");
+            if let Some(ref mut filter) = method_filter {
+                *filter = filter.or(method);
+            } else {
+                method_filter = Some(method);
+            }
         }
 
         Router::<S>::new().route(
             url.as_ref(),
             on(
-                method_filter,
-                |state: State<S>, request: Request<Body>| async move {
+                method_filter.expect("No methods found"),
+                |State(state): State<S>, request: Request| async move {
                     let (mut parts, body) = request.into_parts();
                     parts.extensions.insert(state);
 
-                    let body = match to_bytes(body).await {
+                    let content_length = parts
+                        .headers
+                        .get(CONTENT_LENGTH)
+                        .and_then(|value| value.to_str().ok())
+                        .and_then(|value| value.parse::<usize>().ok())
+                        .unwrap_or(10 * 1024 * 1024); // Default to 10MB if not present
+
+                    let body = match to_bytes(body, content_length).await {
                         Ok(body) => body.to_vec(),
                         Err(err) => {
                             return (

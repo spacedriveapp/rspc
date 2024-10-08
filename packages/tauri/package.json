@@ -7,12 +7,12 @@
   "license": "MIT",
   "main": "src/v2.ts",
   "dependencies": {
-    "@tauri-apps/api": "^2.0.1"
+    "@tauri-apps/api": "^2.0.2"
   },
   "devDependencies": {
     "@spacedrive/rspc-client": "workspace:*"
   },
   "peerDependencies": {
-    "@spacedrive/rspc-client": "^1.0"
+    "@spacedrive/rspc-client": "^0.2.0"
   }
 }

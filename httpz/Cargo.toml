@@ -21,11 +21,11 @@ keywords = ["async", "http", "httpz", "web", "websockets"]
 
 [dependencies]
 async-tungstenite = { version = "0.28.0", features = ["tokio-runtime"] }
-axum              = { version = "0.6.20", features = [] }
+axum              = { version = "0.7.7", features = ["macros"] }
 base64            = { version = "0.22.1" }
 form_urlencoded   = "1.2.0"
 futures           = "0.3.28"
-http              = { version = "0.2.12", features = [] }
+http              = { version = "1.1.0", features = [] }
 hyper             = "0.14.27"                                                       # TODO: Remove this if possible or feature gate it. I think Axum needs it.
 percent-encoding  = { version = "2.3.0", features = [] }
 sha1              = { version = "0.10.5" }
@@ -34,5 +34,5 @@ tokio             = { version = "1.29.1", features = [], default-features = fals
 tracing           = { version = "0.1.37" }
 
 [dev-dependencies]
-axum  = { version = "0.6.20", features = [] }
+axum  = { version = "0.7.7", features = [] }
 tokio = { version = "1.29.1", features = ["fs", "macros", "rt-multi-thread"] }

@@ -19,6 +19,6 @@
   },
   "peerDependencies": {
     "react": "^18.3.1",
-    "@spacedrive/rspc-client": "^1.0"
+    "@spacedrive/rspc-client": "^0.2.0"
   }
 }
