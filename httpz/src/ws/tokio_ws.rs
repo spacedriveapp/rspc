@@ -11,6 +11,7 @@ use http::{
     HeaderValue, Method, Response, StatusCode,
 };
 use hyper::upgrade::{OnUpgrade, Upgraded};
+use hyper_util::rt::TokioIo;
 use sha1::{Digest, Sha1};
 
 #[allow(clippy::declare_interior_mutable_const)] // TODO: Fix
@@ -90,10 +91,12 @@ where
         tokio::spawn(async move {
             let upgraded = on_upgrade.await.expect("connection upgrade failed");
 
+            let upgraded = hyper_util::rt::TokioIo::new(upgraded);
+
             let upgraded = async_tungstenite::tokio::TokioAdapter::new(upgraded);
 
-            let socket = WebSocketStream::from_raw_socket(upgraded, protocol::Role::Server, None) // TODO: Specify context: Some(config)
-                .await;
+            let socket =
+                WebSocketStream::from_raw_socket(upgraded, protocol::Role::Server, None).await;
 
             (self.handler)(self.req, Box::new(TokioSocket(socket))).await;
         });
@@ -145,37 +148,37 @@ fn sign(key: &[u8]) -> HeaderValue {
         .expect("base64 is a valid value")
 }
 
-pub(crate) struct TokioSocket(WebSocketStream<TokioAdapter<Upgraded>>);
+pub(crate) struct TokioSocket(WebSocketStream<TokioAdapter<TokioIo<Upgraded>>>);
 
 impl Sink<Message> for TokioSocket {
     type Error = crate::Error;
 
     fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        <WebSocketStream<TokioAdapter<Upgraded>> as Sink<async_tungstenite::tungstenite::Message>>::poll_ready(
-            Pin::new(&mut self.0),
-            cx,
-        ).map_err(|e| e.into())
+        <WebSocketStream<TokioAdapter<TokioIo<Upgraded>>> as Sink<
+            async_tungstenite::tungstenite::Message,
+        >>::poll_ready(Pin::new(&mut self.0), cx)
+        .map_err(|e| e.into())
     }
 
     fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
-        <WebSocketStream<TokioAdapter<Upgraded>> as Sink<async_tungstenite::tungstenite::Message>>::start_send(
-            Pin::new(&mut self.0),
-            item.into(),
-        ).map_err(|e| e.into())
+        <WebSocketStream<TokioAdapter<TokioIo<Upgraded>>> as Sink<
+            async_tungstenite::tungstenite::Message,
+        >>::start_send(Pin::new(&mut self.0), item.into())
+        .map_err(|e| e.into())
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        <WebSocketStream<TokioAdapter<Upgraded>> as Sink<async_tungstenite::tungstenite::Message>>::poll_flush(
-            Pin::new(&mut self.0),
-            cx,
-        ).map_err(|e| e.into())
+        <WebSocketStream<TokioAdapter<TokioIo<Upgraded>>> as Sink<
+            async_tungstenite::tungstenite::Message,
+        >>::poll_flush(Pin::new(&mut self.0), cx)
+        .map_err(|e| e.into())
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        <WebSocketStream<TokioAdapter<Upgraded>> as Sink<async_tungstenite::tungstenite::Message>>::poll_close(
-            Pin::new(&mut self.0),
-            cx,
-        ).map_err(|e| e.into())
+        <WebSocketStream<TokioAdapter<TokioIo<Upgraded>>> as Sink<
+            async_tungstenite::tungstenite::Message,
+        >>::poll_close(Pin::new(&mut self.0), cx)
+        .map_err(|e| e.into())
     }
 }
 
@@ -183,7 +186,7 @@ impl Stream for TokioSocket {
     type Item = Result<Message, crate::Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        match <WebSocketStream<TokioAdapter<Upgraded>> as Stream>::poll_next(
+        match <WebSocketStream<TokioAdapter<TokioIo<Upgraded>>> as Stream>::poll_next(
             Pin::new(&mut self.0),
             cx,
         ) {
