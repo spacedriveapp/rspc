@@ -100,13 +100,13 @@ export class AlphaClient<P extends ProceduresDef> {
     }
   }
 
-  async addSubscription<
+  addSubscription<
     K extends P['subscriptions']['key'] & string,
     TData = inferProcedureResult<P, 'subscriptions', K>,
   >(
     keyAndInput: [K, ..._inferProcedureHandlerInput<P, 'subscriptions', K>],
     opts: SubscriptionOptions<TData> & { context?: OperationContext }
-  ): Promise<() => void> {
+  ): () => void {
     try {
       const keyAndInput2 = this.mapQueryKey?.(keyAndInput) ?? keyAndInput
 
@@ -131,7 +131,10 @@ export class AlphaClient<P extends ProceduresDef> {
       return result.abort
     } catch (err) {
       if (err instanceof RSPCError) {
-        if (this.onError) await this.onError(err)
+        if (this.onError)
+          this.onError(err)?.catch(error => {
+            console.error('Failure during onError handler for addSubscription', error)
+          })
         return () => {}
       }
 

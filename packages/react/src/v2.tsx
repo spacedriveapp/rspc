@@ -145,13 +145,10 @@ export function createReactQueryHooks<P extends ProceduresDef>(
       if (!enabled) {
         return
       }
-      const subscription = client.addSubscription<K, TData>(keyAndInput, {
+      return client.addSubscription<K, TData>(keyAndInput, {
         onData: opts.onData,
         onError: opts.onError,
       })
-      return () => {
-        subscription.then(unsubscribe => unsubscribe())
-      }
     }, [queryKey, enabled])
   }
 
