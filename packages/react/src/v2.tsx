@@ -14,6 +14,7 @@ import type {
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
+  UseSuspenseQueryResult,
 } from '@tanstack/react-query'
 import type { ReactElement } from 'react'
 
@@ -22,6 +23,7 @@ import {
   useInfiniteQuery as __useInfiniteQuery,
   useMutation as __useMutation,
   useQuery as __useQuery,
+  useSuspenseQuery as __useSuspenseQuery,
   hashKey,
   QueryClient,
   QueryClientProvider,
@@ -86,18 +88,20 @@ export function createReactQueryHooks<P extends ProceduresDef>(
       UseQueryOptions<TQueryFnData, RSPCError, TData, [K, inferQueryInput<P, K>]>,
       'queryKey' | 'queryFn'
     > &
-      TBaseOptions
-  ): UseQueryResult<TData, RSPCError> {
-    const { rspc, ...rawOpts } = opts ?? {}
+      TBaseOptions & { suspense?: boolean }
+  ): typeof opts extends { suspense: true }
+    ? UseSuspenseQueryResult<TData, RSPCError>
+    : UseQueryResult<TData, RSPCError> {
+    const { rspc, suspense, ...rawOpts } = opts ?? {}
     const client = rspc?.client ?? useContext().client
 
-    return __useQuery({
+    return (suspense ? __useSuspenseQuery : __useQuery)({
       queryKey: mapQueryKey(keyAndInput) as [K, inferQueryInput<P, K>],
       queryFn: async () => {
         return (await client.query(keyAndInput)) as TQueryFnData
       },
       ...rawOpts,
-    })
+    }) as any
   }
 
   function useMutation<K extends P['mutations']['key'] & string, TContext = unknown>(
