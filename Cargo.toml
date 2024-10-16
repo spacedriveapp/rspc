@@ -59,7 +59,7 @@ specta               = { version = "=2.0.0-rc.20", features = ["derive", "serde"
 specta-datatype-from = { git = "https://github.com/specta-rs/specta", rev = "8509af0162" }
 specta-serde         = { version = "=0.0.7" }
 specta-typescript    = { version = "=0.0.7", features = ["function"] }
-tauri                = { version = "2.0.2", optional = true }
+tauri                = { version = "2.0", optional = true }
 thiserror            = "1.0"
 tokio                = { version = "1.40", features = ["macros", "rt", "sync"] }
 tracing              = { version = "0.1.37" }
